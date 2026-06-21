@@ -1,27 +1,25 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<meta name="theme-color" content="#15171b">
+<meta name="theme-color" content="#121212">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2315171b'/%3E%3Ccircle cx='22' cy='20' r='2' fill='%23ece9e2'/%3E%3Ccircle cx='70' cy='14' r='1.4' fill='%23ece9e2'/%3E%3Ccircle cx='84' cy='30' r='1.8' fill='%23ece9e2'/%3E%3Crect x='28' y='55' width='8' height='25' fill='%23cc8a4a'/%3E%3Crect x='42' y='35' width='8' height='45' fill='%23cc8a4a'/%3E%3Crect x='56' y='45' width='8' height='35' fill='%23cc8a4a'/%3E%3Crect x='70' y='25' width='8' height='55' fill='%23cc8a4a'/%3E%3C/svg%3E">
-<title>Starry Night Music Player</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23121212'/%3E%3Crect x='30' y='40' width='40' height='6' fill='%23f0f0f0'/%3E%3Crect x='30' y='54' width='40' height='6' fill='%23f0f0f0'/%3E%3Crect x='30' y='68' width='24' height='6' fill='%23f0f0f0'/%3E%3C/svg%3E">
+<title>68 music app</title>
 <style>
   :root {
-    --bg: #15171b;
-    --surface: #1d2025;
-    --surface-raised: #24272d;
-    --hairline: #2b2f35;
-    --text: #ece9e2;
-    --text-dim: #8b8f97;
-    --text-faint: #5b5f66;
-    --accent: #cc8a4a;
-    --accent-soft: rgba(204, 138, 74, 0.14);
-    --danger: #d8685a;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --bg: #121212;
+    --surface: #1c1c1c;
+    --surface-raised: #262626;
+    --hairline: #323232;
+    --text: #f0f0f0;
+    --text-dim: #a0a0a0;
+    --text-faint: #6e6e6e;
+    --accent: #c8c8c8;
+    --accent-soft: rgba(200, 200, 200, 0.12);
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace;
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -31,7 +29,7 @@
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: var(--sans);
+    font-family: var(--mono);
     overscroll-behavior: none;
     transition: background-color 0.25s ease, color 0.25s ease;
   }
@@ -48,157 +46,134 @@
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
-  /* ---------- Three stacked panes: 45% / 45% / 10% ---------- */
-  #library-pane    { flex: 45 1 0; min-height: 0; display: flex; flex-direction: column; border-bottom: 1px solid var(--hairline); }
-  #nowplaying-pane { flex: 45 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: center; padding: 10px 24px; border-bottom: 1px solid var(--hairline); overflow: hidden; }
-  #settings-pane   { flex: 10 1 0; min-height: 56px; display: flex; align-items: center; gap: 22px; padding: 6px 22px; }
+  /* ---------- Four resizable panes ---------- */
+  .pane { min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+  #menu-pane     { min-height: 48px; }
+  #library-pane  { min-height: 60px; }
+  #playlist-pane { min-height: 60px; justify-content: center; padding: 8px 24px; }
+  #settings-pane { min-height: 64px; }
 
-  /* ---------- Library header ---------- */
-  header { flex: 0 0 auto; padding: 8px 18px 0 18px; }
+  /* ---------- Resize handles (long-press, then drag) ---------- */
+  .resize-handle {
+    flex: 0 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    cursor: row-resize;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: none;
+  }
+  .resize-handle .grip { width: 36px; height: 3px; background: var(--hairline); }
+  .resize-handle.dragging { background: var(--text); }
+  .resize-handle.dragging .grip { background: var(--bg); }
 
-  .eyebrow {
+  /* ---------- Win95 / terminal-style bevel buttons (no icons anywhere except slider thumbs) ---------- */
+  .text-btn {
+    appearance: none;
+    background: var(--surface);
+    border-style: solid;
+    border-width: 2px;
+    border-color: rgba(255,255,255,0.55) rgba(0,0,0,0.55) rgba(0,0,0,0.55) rgba(255,255,255,0.55);
+    border-radius: 0;
+    color: var(--text);
+    padding: 7px 13px;
     font-family: var(--mono);
     font-size: 0.6875rem;
-    letter-spacing: 0.12em;
-    color: var(--text-faint);
+    font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    white-space: nowrap;
   }
-
-  .header-row { display: flex; align-items: center; justify-content: space-between; padding: 2px 0 8px 0; }
-
-  h1 { font-size: 1.1875rem; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
-
-  .icon-btn {
-    appearance: none; background: none; border: none; color: var(--text);
-    width: 34px; height: 34px; border-radius: 8px;
-    display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+  .text-btn:active, .text-btn.active {
+    border-color: rgba(0,0,0,0.55) rgba(255,255,255,0.55) rgba(255,255,255,0.55) rgba(0,0,0,0.55);
   }
-  .icon-btn:active { background: var(--surface-raised); }
-  .icon-btn.active { color: var(--accent); }
-  .icon-btn svg { width: 19px; height: 19px; }
+  .text-btn.small { font-size: 0.59375rem; padding: 4px 9px; }
+  .text-btn.primary { font-size: 0.8125rem; padding: 9px 20px; }
 
-  .header-actions { display: flex; gap: 2px; }
-
-  .search-row { padding-bottom: 8px; }
-  .search-input {
-    width: 100%; background: var(--surface); border: 1px solid var(--hairline);
-    border-radius: 8px; color: var(--text); font-size: 0.9375rem; padding: 8px 11px;
-    font-family: var(--sans);
+  /* ---------- Menu pane ---------- */
+  #menu-pane { display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 0 16px; gap: 10px; }
+  .app-title-wrap { position: relative; }
+  .title-menu {
+    position: absolute; top: calc(100% + 4px); left: 0;
+    background: var(--surface); border: 2px solid;
+    border-color: rgba(255,255,255,0.55) rgba(0,0,0,0.55) rgba(0,0,0,0.55) rgba(255,255,255,0.55);
+    display: flex; flex-direction: column; gap: 4px; padding: 6px; z-index: 30; min-width: 200px;
   }
-  .search-input::placeholder { color: var(--text-faint); }
-  .search-input:focus { outline: none; border-color: var(--accent); }
+  .title-menu .text-btn { text-align: left; }
+  .menu-actions { display: flex; gap: 8px; }
 
   /* ---------- Library list ---------- */
   #library { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
   .track-row {
-    display: grid; grid-template-columns: 20px 1fr auto auto auto;
+    display: grid; grid-template-columns: 28px 1fr auto auto auto;
     align-items: center; gap: 9px; padding: 9px 18px;
     border-bottom: 1px solid var(--hairline); cursor: pointer;
   }
   .track-row.current { background: var(--accent-soft); }
   .track-row:active { background: var(--surface-raised); }
 
-  .track-meter-slot { width: 20px; display: flex; justify-content: center; }
+  .track-index { font-size: 0.75rem; color: var(--text-faint); text-align: right; font-variant-numeric: tabular-nums; }
+  .track-row.current .track-index { color: var(--text); font-weight: 700; }
 
-  .track-info { min-width: 0; }
-  .track-title { font-size: 0.9375rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .track-row.current .track-title { color: var(--accent); }
-  .track-sub { font-size: 0.78125rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+  .track-title { font-size: 0.875rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-row.current .track-title { font-weight: 800; }
 
   .pill {
-    font-family: var(--mono); font-size: 0.59375rem; font-weight: 700; letter-spacing: 0.04em;
-    color: var(--text-dim); border: 1px solid var(--hairline); border-radius: 4px; padding: 2px 5px;
+    font-size: 0.59375rem; font-weight: 700; letter-spacing: 0.04em;
+    color: var(--text-dim); border: 1px solid var(--hairline); padding: 2px 5px;
   }
 
-  .track-duration { font-family: var(--mono); font-size: 0.78125rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
-
-  .track-delete { display: none; appearance: none; background: none; border: none; color: var(--danger); width: 26px; height: 26px; }
-  body.edit-mode .track-delete { display: inline-flex; align-items: center; justify-content: center; }
+  .track-duration { font-size: 0.78125rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .track-delete { display: none; }
+  body.edit-mode .track-delete { display: inline-flex; }
   body.edit-mode .track-duration { display: none; }
 
-  .empty-state { padding: 14% 28px 0 28px; text-align: center; }
-  .empty-state h2 { font-size: 1.0625rem; margin: 0 0 6px 0; color: var(--text); }
-  .empty-state p { font-size: 0.84375rem; color: var(--text-dim); line-height: 1.6; margin: 0; }
+  .empty-state { padding: 12% 28px 0 28px; text-align: center; }
+  .empty-state .line1 { font-size: 1rem; font-weight: 700; margin: 0 0 8px 0; }
+  .empty-state .line2 { font-size: 0.8125rem; color: var(--text-dim); }
 
-  /* ---------- VU meter (signature element) ---------- */
-  .meter { display: flex; align-items: flex-end; gap: 2px; height: 13px; }
-  .meter span { width: 3px; background: var(--accent); border-radius: 1px; transform: scaleY(0.3); transform-origin: bottom; }
-  .meter.playing span { animation: meterBar 1.1s ease-in-out infinite; }
-  .meter span:nth-child(1) { height: 6px;  animation-delay: 0s; }
-  .meter span:nth-child(2) { height: 11px; animation-delay: 0.18s; }
-  .meter span:nth-child(3) { height: 8px;  animation-delay: 0.36s; }
-  .meter span:nth-child(4) { height: 12px; animation-delay: 0.09s; }
-  @keyframes meterBar { 0%, 100% { transform: scaleY(0.25); } 50% { transform: scaleY(1); } }
-  @media (prefers-reduced-motion: reduce) { .meter.playing span { animation: none; transform: scaleY(0.7); } }
-
-  /* ---------- Now Playing pane ---------- */
-  .np-top-row { display: flex; align-items: center; gap: 18px; }
-
-  .np-art-mini {
-    flex: 0 0 84px; width: 84px; height: 84px; border-radius: 10px;
-    background: var(--surface); border: 1px solid var(--hairline);
-    display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
-  }
-  .np-art-mini::before, .np-art-mini::after {
-    content: ""; position: absolute; width: 3px; height: 3px; border-radius: 50%;
-    background: var(--text-faint); opacity: 0.6;
-  }
-  .np-art-mini::before { top: 10px; left: 14px; }
-  .np-art-mini::after { top: 18px; right: 16px; width: 2px; height: 2px; }
-
-  .np-meter { gap: 5px; height: 42px; }
-  .np-meter span { width: 7px; border-radius: 2px; }
-  .np-meter span:nth-child(1) { height: 30%; animation-delay: 0s; }
-  .np-meter span:nth-child(2) { height: 60%; animation-delay: 0.14s; }
-  .np-meter span:nth-child(3) { height: 95%; animation-delay: 0.28s; }
-  .np-meter span:nth-child(4) { height: 50%; animation-delay: 0.07s; }
-  .np-meter span:nth-child(5) { height: 75%; animation-delay: 0.21s; }
-
-  .np-meta-block { flex: 1; min-width: 0; }
-  .np-title-row { display: flex; align-items: center; gap: 8px; }
-  .np-title { font-size: 1.125rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .np-artist { font-size: 0.875rem; color: var(--text-dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .np-edit-btn { background: none; border: none; color: var(--text-faint); width: 24px; height: 24px; flex: 0 0 auto; }
-  .np-edit-btn svg { width: 15px; height: 15px; }
+  /* ---------- Playlist / Now Playing pane ---------- */
+  .np-meta-block { text-align: center; }
+  .np-title { font-size: 1.0625rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .np-title-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
   .np-edit-input {
-    background: var(--surface); border: 1px solid var(--accent); border-radius: 6px; color: var(--text);
-    font-family: var(--sans); font-size: 0.9375rem; padding: 3px 8px; width: 100%;
+    background: var(--surface); border: 1px solid var(--accent); color: var(--text);
+    font-family: var(--mono); font-size: 0.9375rem; padding: 4px 9px; width: 60%; text-align: center;
   }
 
-  .np-progress { margin-top: 14px; }
+  .np-progress { margin-top: 16px; }
   input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; background: var(--hairline); border-radius: 2px; }
   input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); margin-top: -5px;
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); margin-top: -6px;
   }
-  .np-times { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.71875rem; color: var(--text-dim); margin-top: 5px; }
+  .np-times { display: flex; justify-content: space-between; font-size: 0.71875rem; color: var(--text-dim); margin-top: 5px; }
 
-  .np-transport { display: flex; align-items: center; justify-content: center; gap: 30px; margin-top: 10px; }
-  .np-transport button { background: none; border: none; color: var(--text); }
-  .np-transport svg { width: 22px; height: 22px; }
-  .np-play-btn svg { width: 42px; height: 42px; }
+  .np-transport { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 16px; }
+  .np-modes { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 12px; }
+  .np-modes .text-btn { min-width: 96px; }
 
-  .np-modes { display: flex; align-items: center; justify-content: center; gap: 32px; margin-top: 8px; }
-  .np-modes button { background: none; border: none; color: var(--text-faint); width: 28px; height: 28px; }
-  .np-modes button.active { color: var(--accent); }
-  .np-modes svg { width: 17px; height: 17px; }
+  .np-error { margin-top: 10px; font-size: 0.75rem; text-align: center; font-weight: 700; }
 
-  .np-error { margin-top: 8px; font-size: 0.78125rem; color: var(--danger); text-align: center; }
-  .np-empty { text-align: center; color: var(--text-dim); font-size: 0.875rem; }
-
-  /* ---------- Settings pane (volume / font size / skin) ---------- */
-  .setting-group { flex: 1 1 0; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  /* ---------- Settings pane ---------- */
+  #settings-pane { flex-direction: row; align-items: center; gap: 20px; padding: 6px 20px; }
+  .setting-group { flex: 1 1 0; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .setting-label {
-    font-family: var(--mono); font-size: 0.5625rem; letter-spacing: 0.08em;
-    color: var(--text-faint); text-transform: uppercase;
+    font-size: 0.59375rem; letter-spacing: 0.04em; color: var(--text-faint);
+    text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  .setting-label .value { color: var(--text); }
 
   /* ---------- Toast ---------- */
   #toast {
     position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0) + 10px);
     transform: translateX(-50%) translateY(-10px);
     background: var(--surface-raised); border: 1px solid var(--hairline); color: var(--text);
-    font-size: 0.8125rem; padding: 9px 16px; border-radius: 8px; max-width: 86%; text-align: center;
+    font-size: 0.75rem; padding: 9px 16px; max-width: 86%; text-align: center;
     opacity: 0; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; z-index: 50;
   }
   #toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -209,44 +184,45 @@
 <body>
 <div id="app">
 
-  <section id="library-pane">
-    <header>
-      <div class="eyebrow">LIBRARY</div>
-      <div class="header-row">
-        <h1>Starry Night Music Player</h1>
-        <div class="header-actions">
-          <button class="icon-btn" id="edit-toggle" title="編集" aria-label="編集">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
-          </button>
-          <button class="icon-btn" id="add-btn" title="ファイルを追加" aria-label="ファイルを追加">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-        </div>
+  <section class="pane" id="menu-pane">
+    <div class="app-title-wrap">
+      <button class="text-btn" id="app-title-btn">68 music app</button>
+      <div class="title-menu" id="title-menu" hidden>
+        <button class="text-btn small" data-url="https://github.com/68berry/music">github.com/68berry/music</button>
+        <button class="text-btn small" data-url="https://68berry.github.io/music">68berry.github.io/music</button>
       </div>
-      <div class="search-row">
-        <input class="search-input" id="search-input" type="search" placeholder="曲名・アーティスト・アルバム" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-      </div>
-    </header>
+    </div>
+    <div class="menu-actions">
+      <button class="text-btn" id="select-btn">Select Tracks</button>
+      <button class="text-btn" id="add-btn">Add Track</button>
+    </div>
+  </section>
+
+  <div class="resize-handle" id="handle-0"><div class="grip"></div></div>
+
+  <section class="pane" id="library-pane">
     <div id="library"></div>
   </section>
 
-  <section id="nowplaying-pane">
-    <div id="np-content">
-      <div class="np-empty" id="np-empty">再生中の曲はありません</div>
-    </div>
+  <div class="resize-handle" id="handle-1"><div class="grip"></div></div>
+
+  <section class="pane" id="playlist-pane">
+    <div id="np-content"></div>
   </section>
 
-  <section id="settings-pane">
+  <div class="resize-handle" id="handle-2"><div class="grip"></div></div>
+
+  <section class="pane" id="settings-pane">
     <div class="setting-group">
-      <span class="setting-label">音量</span>
+      <span class="setting-label">VOLUME</span>
       <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
     </div>
     <div class="setting-group">
-      <span class="setting-label">文字サイズ</span>
-      <input type="range" id="fontsize-slider" min="1" max="10" step="1" value="6">
+      <span class="setting-label">TEXT SIZE <span class="value" id="fontsize-values">16PX / 12.0PT / 1.00REM</span></span>
+      <input type="range" id="fontsize-slider" min="8" max="24" step="1" value="16">
     </div>
     <div class="setting-group">
-      <span class="setting-label">配色(白 → 黒)</span>
+      <span class="setting-label">APPEARANCE (WHITE &#8594; BLACK)</span>
       <input type="range" id="theme-slider" min="0" max="100" step="1" value="100">
     </div>
   </section>
@@ -261,13 +237,13 @@
   "use strict";
 
   // ---------------- IndexedDB ----------------
-  const DB_NAME = "starry-night-player";
+  const DB_NAME = "music-app-68";
   const DB_VERSION = 1;
   const STORE = "tracks";
 
   function openDB() {
     return new Promise((resolve, reject) => {
-      if (!("indexedDB" in window)) { reject(new Error("このブラウザではIndexedDBが使えません")); return; }
+      if (!("indexedDB" in window)) { reject(new Error("IndexedDB is not available")); return; }
       const req = indexedDB.open(DB_NAME, DB_VERSION);
       req.onupgradeneeded = () => {
         const db = req.result;
@@ -315,19 +291,21 @@
     currentIndex: -1,
     currentTrack: null,
     isPlaying: false,
-    repeatMode: "off", // off | one | all
+    repeatMode: "off", // off | all | one
     shuffle: false,
     editMode: false,
-    searchText: "",
     currentObjectURL: null,
+    paneRatios: [10, 40, 40, 10], // menu, library, playlist, settings
   };
 
   const SUPPORTED_EXT = ["opus", "ogg", "flac", "m4a", "mp3", "wav", "aiff", "aac", "caf"];
-  const SETTINGS_KEY = "starry-night-player-settings";
-  const FONT_STEPS = [11, 12, 13, 14, 15, 16, 17, 18, 20, 22];
+  const SETTINGS_KEY = "music-app-68-settings";
+  const PANE_MIN = 6;
+  const PANE_MAX = 70;
 
-  const LIGHT = { bg:[250,250,248], surface:[240,238,233], surfaceRaised:[230,227,220], hairline:[214,210,201], text:[26,26,26], textDim:[96,93,88], textFaint:[140,137,130], accent:[168,99,31] };
-  const DARK  = { bg:[21,23,27], surface:[29,32,37], surfaceRaised:[36,39,45], hairline:[43,47,53], text:[236,233,226], textDim:[139,143,151], textFaint:[91,95,102], accent:[204,138,74] };
+  // Grayscale-only palette: white at t=0, black at t=1. No hue anywhere.
+  const LIGHT = { bg:[250,250,250], surface:[240,240,240], surfaceRaised:[228,228,228], hairline:[210,210,210], text:[20,20,20], textDim:[100,100,100], textFaint:[150,150,150], accent:[80,80,80] };
+  const DARK  = { bg:[18,18,18], surface:[28,28,28], surfaceRaised:[38,38,38], hairline:[50,50,50], text:[240,240,240], textDim:[160,160,160], textFaint:[110,110,110], accent:[200,200,200] };
 
   // ---------------- DOM refs ----------------
   const $ = (id) => document.getElementById(id);
@@ -336,6 +314,9 @@
   const npContent = $("np-content");
   const toastEl = $("toast");
   const fileInput = $("file-input");
+  const appEl = $("app");
+
+  const panes = [$("menu-pane"), $("library-pane"), $("playlist-pane"), $("settings-pane")];
 
   // ---------------- Helpers ----------------
   function uid() {
@@ -349,13 +330,8 @@
     return m + ":" + String(s).padStart(2, "0");
   }
 
-  function guessMetadataFromFilename(name) {
-    const base = name.replace(/\.[^.]+$/, "");
-    const sepIndex = base.indexOf(" - ");
-    if (sepIndex > 0) {
-      return { artist: base.slice(0, sepIndex).trim(), title: base.slice(sepIndex + 3).trim() };
-    }
-    return { artist: "不明なアーティスト", title: base };
+  function titleFromFilename(name) {
+    return name.replace(/\.[^.]+$/, "");
   }
 
   function showToast(message) {
@@ -369,23 +345,24 @@
     return String(str).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
   }
 
-  // ---------------- Settings: volume / font size / theme ----------------
+  // ---------------- Settings: volume / text size / appearance / pane ratios ----------------
   function loadSettings() {
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
       if (raw) return JSON.parse(raw);
-    } catch (e) { /* localStorageが使えない環境ではデフォルト値を使う */ }
-    return { volume: 1, fontStep: 6, theme: 100 };
+    } catch (e) { /* fall back to defaults */ }
+    return { volume: 1, fontSize: 16, theme: 100, paneRatios: [10, 40, 40, 10] };
   }
 
   function saveSettings() {
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify({
         volume: parseFloat($("volume-slider").value),
-        fontStep: parseInt($("fontsize-slider").value, 10),
+        fontSize: parseInt($("fontsize-slider").value, 10),
         theme: parseInt($("theme-slider").value, 10),
+        paneRatios: state.paneRatios,
       }));
-    } catch (e) { /* 保存できなくても致命的ではないので無視 */ }
+    } catch (e) { /* not fatal */ }
   }
 
   function lerp(a, b, t) { return Math.round(a + (b - a) * t); }
@@ -404,19 +381,31 @@
     root.setProperty("--accent", lerpColor(LIGHT.accent, DARK.accent, t));
   }
 
-  function applyFontSize(step) {
-    const px = FONT_STEPS[Math.max(1, Math.min(10, step)) - 1] || 16;
+  function applyFontSize(px) {
     document.documentElement.style.fontSize = px + "px";
+    const pt = (px * 0.75).toFixed(1);
+    const rem = (px / 16).toFixed(2);
+    $("fontsize-values").textContent = `${px}PX / ${pt}PT / ${rem}REM`;
+  }
+
+  function applyPaneRatios() {
+    panes.forEach((el, i) => {
+      el.style.flexGrow = state.paneRatios[i];
+      el.style.flexShrink = 1;
+      el.style.flexBasis = "0%";
+    });
   }
 
   function initSettings() {
     const s = loadSettings();
     $("volume-slider").value = s.volume;
-    $("fontsize-slider").value = s.fontStep;
+    $("fontsize-slider").value = s.fontSize;
     $("theme-slider").value = s.theme;
+    if (Array.isArray(s.paneRatios) && s.paneRatios.length === 4) state.paneRatios = s.paneRatios;
     audio.volume = s.volume;
-    applyFontSize(s.fontStep);
+    applyFontSize(s.fontSize);
     applyTheme(s.theme);
+    applyPaneRatios();
   }
 
   $("volume-slider").addEventListener("input", (e) => {
@@ -432,6 +421,73 @@
     saveSettings();
   });
 
+  // ---------------- Resize handles (long-press, then drag up/down) ----------------
+  function setupResizeHandle(handleEl, aboveIndex, belowIndex) {
+    const LONG_PRESS_MS = 450;
+    let pressTimer = null;
+    let dragging = false;
+    let startY = 0;
+    let startRatios = null;
+
+    function endDrag() {
+      dragging = false;
+      handleEl.classList.remove("dragging");
+      saveSettings();
+    }
+
+    handleEl.addEventListener("pointerdown", (e) => {
+      clearTimeout(pressTimer);
+      pressTimer = setTimeout(() => {
+        dragging = true;
+        startY = e.clientY;
+        startRatios = state.paneRatios.slice();
+        handleEl.classList.add("dragging");
+        try { handleEl.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      }, LONG_PRESS_MS);
+    });
+
+    handleEl.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      e.preventDefault();
+      const deltaY = e.clientY - startY;
+      const totalHeight = appEl.clientHeight || 1;
+      let delta = (deltaY / totalHeight) * 100;
+
+      delta = Math.max(delta, PANE_MIN - startRatios[aboveIndex]);
+      delta = Math.min(delta, PANE_MAX - startRatios[aboveIndex]);
+      delta = Math.min(delta, startRatios[belowIndex] - PANE_MIN);
+      delta = Math.max(delta, startRatios[belowIndex] - PANE_MAX);
+
+      state.paneRatios[aboveIndex] = startRatios[aboveIndex] + delta;
+      state.paneRatios[belowIndex] = startRatios[belowIndex] - delta;
+      applyPaneRatios();
+    });
+
+    handleEl.addEventListener("pointerup", () => { clearTimeout(pressTimer); if (dragging) endDrag(); });
+    handleEl.addEventListener("pointercancel", () => { clearTimeout(pressTimer); if (dragging) endDrag(); });
+    handleEl.addEventListener("pointerleave", () => { if (!dragging) clearTimeout(pressTimer); });
+  }
+
+  setupResizeHandle($("handle-0"), 0, 1);
+  setupResizeHandle($("handle-1"), 1, 2);
+  setupResizeHandle($("handle-2"), 2, 3);
+
+  // ---------------- App title link menu ----------------
+  const titleMenu = $("title-menu");
+  $("app-title-btn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    titleMenu.hidden = !titleMenu.hidden;
+  });
+  titleMenu.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-url]");
+    if (!btn) return;
+    window.open(btn.getAttribute("data-url"), "_blank", "noopener");
+    titleMenu.hidden = true;
+  });
+  document.addEventListener("click", (e) => {
+    if (!titleMenu.hidden && !e.target.closest(".app-title-wrap")) titleMenu.hidden = true;
+  });
+
   // ---------------- Import ----------------
   fileInput.addEventListener("change", async (e) => {
     const files = Array.from(e.target.files || []);
@@ -440,87 +496,59 @@
     for (const file of files) {
       const ext = (file.name.split(".").pop() || "").toLowerCase();
       if (!SUPPORTED_EXT.includes(ext)) continue;
-      const { title, artist } = guessMetadataFromFilename(file.name);
       const track = {
-        id: uid(), title, artist, album: "不明なアルバム", duration: 0,
+        id: uid(), title: titleFromFilename(file.name), duration: 0,
         fileName: file.name, extension: ext, mimeType: file.type || "",
         blob: file, addedAt: Date.now(), playCount: 0,
       };
       try { await dbPut(track); imported++; }
-      catch (err) { showToast(`「${file.name}」を保存できませんでした`); }
+      catch (err) { showToast(`Couldn't save "${file.name}"`); }
     }
     fileInput.value = "";
-    showToast(imported === 0 ? "対応する音声ファイルが見つかりませんでした" : `${imported}曲を追加しました`);
+    showToast(imported === 0 ? "No supported audio files found" : `${imported} track(s) added`);
     await refreshLibrary();
   });
 
   $("add-btn").addEventListener("click", () => fileInput.click());
 
-  $("edit-toggle").addEventListener("click", () => {
+  $("select-btn").addEventListener("click", () => {
     state.editMode = !state.editMode;
-    $("edit-toggle").classList.toggle("active", state.editMode);
+    $("select-btn").textContent = state.editMode ? "Done" : "Select Tracks";
+    $("select-btn").classList.toggle("active", state.editMode);
     document.body.classList.toggle("edit-mode", state.editMode);
-  });
-
-  $("search-input").addEventListener("input", (e) => {
-    state.searchText = e.target.value;
-    renderLibrary();
   });
 
   // ---------------- Library rendering ----------------
   async function refreshLibrary() {
     try { state.tracks = await dbGetAll(); }
-    catch (err) { showToast("ライブラリの読み込みに失敗しました"); state.tracks = []; }
-    state.tracks.sort((a, b) => {
-      if (a.artist !== b.artist) return a.artist.localeCompare(b.artist, "ja");
-      if (a.album !== b.album) return a.album.localeCompare(b.album, "ja");
-      return a.title.localeCompare(b.title, "ja");
-    });
+    catch (err) { showToast("Couldn't load your library"); state.tracks = []; }
+    state.tracks.sort((a, b) => a.title.localeCompare(b.title));
     renderLibrary();
   }
 
-  function filteredTracks() {
-    const q = state.searchText.trim().toLowerCase();
-    if (!q) return state.tracks;
-    return state.tracks.filter(t =>
-      t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q) || t.album.toLowerCase().includes(q)
-    );
-  }
-
   function renderLibrary() {
-    const tracks = filteredTracks();
+    const tracks = state.tracks;
 
-    if (state.tracks.length === 0) {
+    if (tracks.length === 0) {
       libraryEl.innerHTML = `
         <div class="empty-state">
-          <h2>曲がありません</h2>
-          <p>右上の + から音声ファイルを選んでください。<br>対応形式: Opus / FLAC / AAC・M4A / MP3 / WAV / AIFF</p>
+          <div class="line1">Bop bop just feel the music</div>
+          <div class="line2">AAC/M4A / AIFF / FLAC / MP3 / Opus / WAV</div>
         </div>`;
       return;
     }
-    if (tracks.length === 0) {
-      libraryEl.innerHTML = `<div class="empty-state"><h2>見つかりません</h2><p>検索条件に一致する曲がありません</p></div>`;
-      return;
-    }
 
-    libraryEl.innerHTML = tracks.map(t => {
+    libraryEl.innerHTML = tracks.map((t, i) => {
       const isCurrent = state.currentTrack && state.currentTrack.id === t.id;
-      const meter = isCurrent
-        ? `<div class="meter${state.isPlaying ? " playing" : ""}"><span></span><span></span><span></span><span></span></div>`
-        : "";
+      const indexLabel = isCurrent ? "&gt;&gt;" : String(i + 1).padStart(2, "0");
       const opusPill = t.extension === "opus" ? `<span class="pill">OPUS</span>` : `<span></span>`;
       return `
         <div class="track-row${isCurrent ? " current" : ""}" data-id="${t.id}">
-          <div class="track-meter-slot">${meter}</div>
-          <div class="track-info">
-            <div class="track-title">${escapeHtml(t.title)}</div>
-            <div class="track-sub">${escapeHtml(t.artist)} — ${escapeHtml(t.album)}</div>
-          </div>
+          <div class="track-index">${indexLabel}</div>
+          <div class="track-title">${escapeHtml(t.title)}</div>
           ${opusPill}
           <div class="track-duration">${t.duration ? formatTime(t.duration) : "--:--"}</div>
-          <button class="track-delete" data-delete-id="${t.id}" aria-label="削除">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </button>
+          <button class="text-btn small track-delete" data-delete-id="${t.id}">Delete</button>
         </div>`;
     }).join("");
   }
@@ -530,7 +558,7 @@
     if (deleteBtn) {
       const id = deleteBtn.getAttribute("data-delete-id");
       const track = state.tracks.find(t => t.id === id);
-      if (track && confirm(`「${track.title}」を削除しますか?`)) {
+      if (track && confirm(`Delete "${track.title}"?`)) {
         await dbDelete(id);
         if (state.currentTrack && state.currentTrack.id === id) stopPlayback();
         await refreshLibrary();
@@ -541,33 +569,22 @@
     const row = e.target.closest(".track-row");
     if (!row) return;
     const id = row.getAttribute("data-id");
-    const list = filteredTracks();
-    const index = list.findIndex(t => t.id === id);
-    if (index >= 0) playQueueAt(list, index);
+    const index = state.tracks.findIndex(t => t.id === id);
+    if (index >= 0) playQueueAt(state.tracks, index);
   });
 
-  // ---------------- Now Playing pane rendering ----------------
+  // ---------------- Playlist / Now Playing pane rendering ----------------
   function renderNowPlayingShell() {
     const t = state.currentTrack;
     if (!t) {
-      npContent.innerHTML = `<div class="np-empty">再生中の曲はありません</div>`;
+      npContent.innerHTML = "";
       return;
     }
     npContent.innerHTML = `
-      <div class="np-top-row">
-        <div class="np-art-mini">
-          <div class="meter np-meter" id="np-meter">
-            <span></span><span></span><span></span><span></span><span></span>
-          </div>
-        </div>
-        <div class="np-meta-block">
-          <div class="np-title-row">
-            <span class="np-title" id="np-title">${escapeHtml(t.title)}</span>
-            <button class="np-edit-btn" id="np-edit-btn" aria-label="タイトル・アーティストを編集">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
-            </button>
-          </div>
-          <div class="np-artist" id="np-artist">${escapeHtml(t.artist)}</div>
+      <div class="np-meta-block">
+        <div class="np-title-row">
+          <span class="np-title" id="np-title">${escapeHtml(t.title)}</span>
+          <button class="text-btn small" id="np-edit-btn">Edit</button>
         </div>
       </div>
 
@@ -577,14 +594,14 @@
       </div>
 
       <div class="np-transport">
-        <button id="np-prev" aria-label="前の曲"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
-        <button id="np-playpause" class="np-play-btn" aria-label="再生・一時停止"></button>
-        <button id="np-next" aria-label="次の曲"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+        <button class="text-btn" id="np-prev">Prev</button>
+        <button class="text-btn primary" id="np-playpause">Play</button>
+        <button class="text-btn" id="np-next">Next</button>
       </div>
 
       <div class="np-modes">
-        <button id="np-shuffle" aria-label="シャッフル"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></button>
-        <button id="np-repeat" aria-label="リピート"></button>
+        <button class="text-btn" id="np-shuffle">Shuffle</button>
+        <button class="text-btn" id="np-repeat">Repeat Off</button>
       </div>
 
       <div class="np-error" id="np-error"></div>
@@ -606,38 +623,32 @@
       $("np-current-time").textContent = formatTime(parseFloat(seekEl.value));
     });
     seekEl.addEventListener("change", () => { seek(parseFloat(seekEl.value)); seekDragging = false; });
+
+    updateAll();
   }
 
   function openMetadataEditor() {
     const t = state.currentTrack;
     if (!t) return;
     const titleEl = $("np-title");
-    const artistEl = $("np-artist");
 
     const titleInput = document.createElement("input");
     titleInput.className = "np-edit-input";
     titleInput.value = t.title;
-    const artistInput = document.createElement("input");
-    artistInput.className = "np-edit-input";
-    artistInput.value = t.artist;
+    titleInput.placeholder = "Title";
 
     titleEl.replaceWith(titleInput);
-    artistEl.replaceWith(artistInput);
     titleInput.focus();
 
     async function commit() {
       t.title = titleInput.value.trim() || t.title;
-      t.artist = artistInput.value.trim() || t.artist;
       await dbPut(t).catch(() => {});
       updateMediaSession(t);
       renderNowPlayingShell();
-      updateAll();
       renderLibrary();
     }
     titleInput.addEventListener("blur", commit);
-    artistInput.addEventListener("blur", commit);
     titleInput.addEventListener("keydown", (e) => { if (e.key === "Enter") titleInput.blur(); });
-    artistInput.addEventListener("keydown", (e) => { if (e.key === "Enter") artistInput.blur(); });
   }
 
   // ---------------- Playback ----------------
@@ -656,7 +667,7 @@
     audio.src = url;
 
     if (isNewTrack) renderNowPlayingShell();
-    else $("np-error") && ($("np-error").textContent = "");
+    else { const errEl = $("np-error"); if (errEl) errEl.textContent = ""; }
 
     audio.play().then(() => {
       state.isPlaying = true;
@@ -666,7 +677,7 @@
     }).catch(err => {
       state.isPlaying = false;
       const errEl = $("np-error");
-      if (errEl) errEl.textContent = `再生できません: ${err.message || "未対応の形式の可能性があります"}`;
+      if (errEl) errEl.textContent = `Can't play this file: ${err.message || "unsupported format"}`;
       updateAll();
     });
 
@@ -728,7 +739,7 @@
   });
   audio.addEventListener("error", () => {
     const errEl = $("np-error");
-    if (errEl) errEl.textContent = "このファイルは再生できません(対応していない形式の可能性があります)";
+    if (errEl) errEl.textContent = "Can't play this file (unsupported format)";
     state.isPlaying = false;
     updateAll();
   });
@@ -736,7 +747,7 @@
   // ---------------- MediaSession (lock screen controls) ----------------
   function updateMediaSession(track) {
     if (!("mediaSession" in navigator)) return;
-    navigator.mediaSession.metadata = new MediaMetadata({ title: track.title, artist: track.artist, album: track.album });
+    navigator.mediaSession.metadata = new MediaMetadata({ title: track.title });
     navigator.mediaSession.setActionHandler("play", () => { audio.play(); state.isPlaying = true; updateAll(); });
     navigator.mediaSession.setActionHandler("pause", () => { audio.pause(); state.isPlaying = false; updateAll(); });
     navigator.mediaSession.setActionHandler("previoustrack", prev);
@@ -758,24 +769,15 @@
     $("np-duration").textContent = formatTime(d || 0);
   }
 
-  function playPauseIconHTML() {
-    if (state.isPlaying) return `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>`;
-    return `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>`;
-  }
-
-  function repeatIconHTML() {
-    if (state.repeatMode === "one") {
-      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><text x="10" y="15" font-size="9" fill="currentColor" stroke="none" font-family="sans-serif">1</text></svg>`;
-    }
-    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`;
+  function repeatLabel() {
+    if (state.repeatMode === "one") return "Repeat One";
+    if (state.repeatMode === "all") return "Repeat All";
+    return "Repeat Off";
   }
 
   function updateAll() {
     const playBtn = $("np-playpause");
-    if (playBtn) playBtn.innerHTML = playPauseIconHTML();
-
-    const meterEl = $("np-meter");
-    if (meterEl) meterEl.classList.toggle("playing", state.isPlaying);
+    if (playBtn) playBtn.textContent = state.isPlaying ? "Pause" : "Play";
 
     const shuffleBtn = $("np-shuffle");
     if (shuffleBtn) shuffleBtn.classList.toggle("active", state.shuffle);
@@ -783,7 +785,7 @@
     const repeatBtn = $("np-repeat");
     if (repeatBtn) {
       repeatBtn.classList.toggle("active", state.repeatMode !== "off");
-      repeatBtn.innerHTML = repeatIconHTML();
+      repeatBtn.textContent = repeatLabel();
     }
 
     updateProgress();
@@ -794,7 +796,7 @@
   initSettings();
   renderNowPlayingShell();
   refreshLibrary().catch(() => {
-    showToast("ライブラリを開けませんでした(プライベートブラウズ中は使えません)");
+    showToast("Couldn't open your library (Private Browsing isn't supported)");
   });
 })();
 </script>
