@@ -6,175 +6,197 @@
 <meta name="theme-color" content="#121212">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23121212'/%3E%3Crect x='30' y='40' width='40' height='6' fill='%23f0f0f0'/%3E%3Crect x='30' y='54' width='40' height='6' fill='%23f0f0f0'/%3E%3Crect x='30' y='68' width='24' height='6' fill='%23f0f0f0'/%3E%3C/svg%3E">
 <title>68 music app</title>
 <style>
   :root {
     --bg: #121212;
     --surface: #1c1c1c;
-    --surface-raised: #262626;
+    --surface-raised: #2a2a2a;
     --hairline: #323232;
     --text: #f0f0f0;
     --text-dim: #a0a0a0;
-    --text-faint: #6e6e6e;
+    --text-faint: #5e5e5e;
     --accent: #c8c8c8;
-    --accent-soft: rgba(200, 200, 200, 0.12);
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace;
+    --accent-soft: rgba(200,200,200,0.10);
+    --mono: ui-monospace,"SF Mono",Menlo,Consolas,"Courier New",monospace;
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   html, body {
-    height: 100%;
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
+    height: 100%; margin: 0;
+    background: var(--bg); color: var(--text);
     font-family: var(--mono);
     overscroll-behavior: none;
     transition: background-color 0.25s ease, color 0.25s ease;
   }
-
   body { display: flex; justify-content: center; }
 
   #app {
-    width: 100%;
-    max-width: 1024px;
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
+    width: 100%; max-width: 1024px; height: 100dvh;
+    display: flex; flex-direction: column;
     padding-top: env(safe-area-inset-top, 0);
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
-  /* ---------- Four resizable panes ---------- */
-  .pane { min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
-  #menu-pane     { min-height: 48px; }
-  #library-pane  { min-height: 60px; }
-  #playlist-pane { min-height: 60px; justify-content: center; padding: 8px 24px; }
-  #settings-pane { min-height: 64px; }
+  /* ── Panes ── */
+  .pane {
+    min-height: 0; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
 
-  /* ---------- Resize handles (long-press, then drag) ---------- */
-  .resize-handle {
-    flex: 0 0 14px;
-    display: flex;
+  #menu-pane {
+    /* flex ratio set by JS; default 20 */
+    min-height: 56px;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
+    gap: 16px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  #library-pane  { min-height: 60px; border-bottom: 1px solid var(--hairline); }
+  #nowplay-pane  { min-height: 60px; justify-content: center; padding: 10px 26px; }
+
+  /* ── Resize handles ── */
+  .resize-handle {
+    flex: 0 0 14px;
+    display: flex; align-items: center; justify-content: center;
     background: var(--bg);
     cursor: row-resize;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none; touch-action: none;
   }
-  .resize-handle .grip { width: 36px; height: 3px; background: var(--hairline); }
+  .resize-handle .grip { width: 40px; height: 3px; background: var(--hairline); }
   .resize-handle.dragging { background: var(--text); }
   .resize-handle.dragging .grip { background: var(--bg); }
 
-  /* ---------- Win95 / terminal-style bevel buttons (no icons anywhere except slider thumbs) ---------- */
-  .text-btn {
+  /* ── Win95 bevel buttons – no icons anywhere ── */
+  .btn {
     appearance: none;
     background: var(--surface);
-    border-style: solid;
-    border-width: 2px;
-    border-color: rgba(255,255,255,0.55) rgba(0,0,0,0.55) rgba(0,0,0,0.55) rgba(255,255,255,0.55);
+    border-style: solid; border-width: 2px;
+    border-color: rgba(255,255,255,0.50) rgba(0,0,0,0.50) rgba(0,0,0,0.50) rgba(255,255,255,0.50);
     border-radius: 0;
     color: var(--text);
-    padding: 7px 13px;
-    font-family: var(--mono);
-    font-size: 0.6875rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    cursor: pointer;
-    white-space: nowrap;
+    font-family: var(--mono); font-weight: 700;
+    font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 8px 16px;
+    cursor: pointer; white-space: nowrap;
   }
-  .text-btn:active, .text-btn.active {
-    border-color: rgba(0,0,0,0.55) rgba(255,255,255,0.55) rgba(255,255,255,0.55) rgba(0,0,0,0.55);
+  .btn:active, .btn.active {
+    border-color: rgba(0,0,0,0.50) rgba(255,255,255,0.50) rgba(255,255,255,0.50) rgba(0,0,0,0.50);
+    background: var(--surface-raised);
   }
-  .text-btn.small { font-size: 0.59375rem; padding: 4px 9px; }
-  .text-btn.primary { font-size: 0.8125rem; padding: 9px 20px; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn.wide { min-width: 140px; }
 
-  /* ---------- Menu pane ---------- */
-  #menu-pane { display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 0 16px; gap: 10px; }
-  .app-title-wrap { position: relative; }
-  .title-menu {
-    position: absolute; top: calc(100% + 4px); left: 0;
-    background: var(--surface); border: 2px solid;
-    border-color: rgba(255,255,255,0.55) rgba(0,0,0,0.55) rgba(0,0,0,0.55) rgba(255,255,255,0.55);
-    display: flex; flex-direction: column; gap: 4px; padding: 6px; z-index: 30; min-width: 200px;
-  }
-  .title-menu .text-btn { text-align: left; }
-  .menu-actions { display: flex; gap: 8px; }
-
-  /* ---------- Library list ---------- */
+  /* ── Library ── */
   #library { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
+  /* each row gets bevel border */
   .track-row {
-    display: grid; grid-template-columns: 28px 1fr auto auto auto;
-    align-items: center; gap: 9px; padding: 9px 18px;
-    border-bottom: 1px solid var(--hairline); cursor: pointer;
+    display: grid;
+    grid-template-columns: 44px 1fr auto auto;
+    align-items: center; gap: 10px;
+    padding: 9px 14px;
+    margin: 4px 8px;
+    background: var(--surface);
+    border-style: solid; border-width: 2px;
+    border-color: rgba(255,255,255,0.40) rgba(0,0,0,0.40) rgba(0,0,0,0.40) rgba(255,255,255,0.40);
+    cursor: pointer;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none; touch-action: pan-y;
   }
-  .track-row.current { background: var(--accent-soft); }
-  .track-row:active { background: var(--surface-raised); }
+  .track-row.current {
+    background: var(--accent-soft);
+    border-color: rgba(255,255,255,0.25) rgba(0,0,0,0.25) rgba(0,0,0,0.25) rgba(255,255,255,0.25);
+  }
+  .track-row.selected {
+    background: var(--surface-raised);
+    border-color: rgba(0,0,0,0.40) rgba(255,255,255,0.40) rgba(255,255,255,0.40) rgba(0,0,0,0.40);
+  }
 
-  .track-index { font-size: 0.75rem; color: var(--text-faint); text-align: right; font-variant-numeric: tabular-nums; }
-  .track-row.current .track-index { color: var(--text); font-weight: 700; }
+  .track-idx {
+    font-size: 0.65rem; color: var(--text-faint);
+    text-align: right; font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+  .track-row.current .track-idx { color: var(--text); font-weight: 700; }
+  .track-row.selected .track-idx { color: var(--accent); font-weight: 700; }
 
-  .track-title { font-size: 0.875rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-title {
+    font-size: 0.875rem; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
   .track-row.current .track-title { font-weight: 800; }
 
   .pill {
-    font-size: 0.59375rem; font-weight: 700; letter-spacing: 0.04em;
+    font-size: 0.575rem; font-weight: 700; letter-spacing: 0.04em;
     color: var(--text-dim); border: 1px solid var(--hairline); padding: 2px 5px;
   }
-
-  .track-duration { font-size: 0.78125rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
-  .track-delete { display: none; }
-  body.edit-mode .track-delete { display: inline-flex; }
-  body.edit-mode .track-duration { display: none; }
-
-  .empty-state { padding: 12% 28px 0 28px; text-align: center; }
-  .empty-state .line1 { font-size: 1rem; font-weight: 700; margin: 0 0 8px 0; }
-  .empty-state .line2 { font-size: 0.8125rem; color: var(--text-dim); }
-
-  /* ---------- Playlist / Now Playing pane ---------- */
-  .np-meta-block { text-align: center; }
-  .np-title { font-size: 1.0625rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .np-title-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
-  .np-edit-input {
-    background: var(--surface); border: 1px solid var(--accent); color: var(--text);
-    font-family: var(--mono); font-size: 0.9375rem; padding: 4px 9px; width: 60%; text-align: center;
+  .track-dur {
+    font-size: 0.75rem; color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
   }
 
-  .np-progress { margin-top: 16px; }
-  input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; background: var(--hairline); border-radius: 2px; }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); margin-top: -6px;
+  .empty-state { padding: 10% 28px 0 28px; text-align: center; }
+  .empty-state .line1 { font-size: 1rem; font-weight: 700; margin: 0 0 10px 0; }
+  .empty-state .line2 { font-size: 0.8rem; color: var(--text-dim); line-height: 1.8; }
+
+  /* ── Now Playing ── */
+  .np-title-row { text-align: center; }
+  .np-title {
+    font-size: 1.0625rem; font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .np-times { display: flex; justify-content: space-between; font-size: 0.71875rem; color: var(--text-dim); margin-top: 5px; }
 
-  .np-transport { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 16px; }
-  .np-modes { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 12px; }
-  .np-modes .text-btn { min-width: 96px; }
-
-  .np-error { margin-top: 10px; font-size: 0.75rem; text-align: center; font-weight: 700; }
-
-  /* ---------- Settings pane ---------- */
-  #settings-pane { flex-direction: row; align-items: center; gap: 20px; padding: 6px 20px; }
-  .setting-group { flex: 1 1 0; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-  .setting-label {
-    font-size: 0.59375rem; letter-spacing: 0.04em; color: var(--text-faint);
-    text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  /* Retro seek bar — pure CSS, no images */
+  .seek-wrap { margin-top: 18px; }
+  .seek-track {
+    position: relative; width: 100%; height: 20px;
+    background: var(--surface);
+    border-style: solid; border-width: 2px;
+    border-color: rgba(0,0,0,0.55) rgba(255,255,255,0.35) rgba(255,255,255,0.35) rgba(0,0,0,0.55);
+    cursor: pointer;
   }
-  .setting-label .value { color: var(--text); }
+  .seek-fill {
+    position: absolute; top: 0; left: 0; height: 100%;
+    background: var(--accent); opacity: 0.45;
+    pointer-events: none;
+  }
+  .seek-thumb {
+    position: absolute; top: 50%; width: 14px; height: 20px;
+    background: var(--surface-raised);
+    border-style: solid; border-width: 2px;
+    border-color: rgba(255,255,255,0.55) rgba(0,0,0,0.55) rgba(0,0,0,0.55) rgba(255,255,255,0.55);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .np-times {
+    display: flex; justify-content: space-between;
+    font-size: 0.6875rem; color: var(--text-dim);
+    margin-top: 4px; letter-spacing: 0.02em;
+  }
 
-  /* ---------- Toast ---------- */
+  .np-transport { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; }
+  .np-transport .btn { min-width: 72px; }
+  .np-transport .btn.playpause { min-width: 90px; }
+
+  .np-modes { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+  .np-modes .btn { min-width: 96px; }
+
+  .np-error { margin-top: 8px; font-size: 0.75rem; text-align: center; font-weight: 700; }
+
+  /* ── Toast ── */
   #toast {
-    position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0) + 10px);
+    position: fixed; left: 50%; top: calc(env(safe-area-inset-top,0) + 10px);
     transform: translateX(-50%) translateY(-10px);
     background: var(--surface-raised); border: 1px solid var(--hairline); color: var(--text);
     font-size: 0.75rem; padding: 9px 16px; max-width: 86%; text-align: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; z-index: 50;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease; z-index: 50;
   }
   #toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -184,19 +206,7 @@
 <body>
 <div id="app">
 
-  <section class="pane" id="menu-pane">
-    <div class="app-title-wrap">
-      <button class="text-btn" id="app-title-btn">68 music app</button>
-      <div class="title-menu" id="title-menu" hidden>
-        <button class="text-btn small" data-url="https://github.com/68berry/music">github.com/68berry/music</button>
-        <button class="text-btn small" data-url="https://68berry.github.io/music">68berry.github.io/music</button>
-      </div>
-    </div>
-    <div class="menu-actions">
-      <button class="text-btn" id="select-btn">Select Tracks</button>
-      <button class="text-btn" id="add-btn">Add Track</button>
-    </div>
-  </section>
+  <section class="pane" id="menu-pane"><!-- rendered by JS --></section>
 
   <div class="resize-handle" id="handle-0"><div class="grip"></div></div>
 
@@ -206,28 +216,12 @@
 
   <div class="resize-handle" id="handle-1"><div class="grip"></div></div>
 
-  <section class="pane" id="playlist-pane">
+  <section class="pane" id="nowplay-pane">
     <div id="np-content"></div>
   </section>
 
-  <div class="resize-handle" id="handle-2"><div class="grip"></div></div>
-
-  <section class="pane" id="settings-pane">
-    <div class="setting-group">
-      <span class="setting-label">VOLUME</span>
-      <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
-    </div>
-    <div class="setting-group">
-      <span class="setting-label">TEXT SIZE <span class="value" id="fontsize-values">16PX / 12.0PT / 1.00REM</span></span>
-      <input type="range" id="fontsize-slider" min="8" max="24" step="1" value="16">
-    </div>
-    <div class="setting-group">
-      <span class="setting-label">APPEARANCE (WHITE &#8594; BLACK)</span>
-      <input type="range" id="theme-slider" min="0" max="100" step="1" value="100">
-    </div>
-  </section>
-
-  <input type="file" id="file-input" multiple accept="audio/*,.opus,.ogg,.flac,.m4a,.mp3,.wav,.aiff,.aac">
+  <input type="file" id="file-input" multiple
+    accept="audio/*,.opus,.ogg,.flac,.m4a,.mp3,.wav,.aiff,.aac">
   <div id="toast"></div>
   <audio id="audio" preload="metadata"></audio>
 </div>
@@ -236,568 +230,526 @@
 (() => {
   "use strict";
 
-  // ---------------- IndexedDB ----------------
-  const DB_NAME = "music-app-68";
-  const DB_VERSION = 1;
-  const STORE = "tracks";
+  // ── IndexedDB ──────────────────────────────────────────────
+  const DB_NAME = "music-app-68", DB_VER = 1, STORE = "tracks";
 
   function openDB() {
-    return new Promise((resolve, reject) => {
-      if (!("indexedDB" in window)) { reject(new Error("IndexedDB is not available")); return; }
-      const req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onupgradeneeded = () => {
-        const db = req.result;
-        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: "id" });
+    return new Promise((res, rej) => {
+      if (!window.indexedDB) { rej(new Error("No IndexedDB")); return; }
+      const r = indexedDB.open(DB_NAME, DB_VER);
+      r.onupgradeneeded = () => {
+        if (!r.result.objectStoreNames.contains(STORE))
+          r.result.createObjectStore(STORE, { keyPath: "id" });
       };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
     });
   }
-
   async function dbPut(track) {
     const db = await openDB();
-    return new Promise((resolve, reject) => {
+    return new Promise((res, rej) => {
       const tx = db.transaction(STORE, "readwrite");
       tx.objectStore(STORE).put(track);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
+      tx.oncomplete = res; tx.onerror = () => rej(tx.error);
     });
   }
-
   async function dbGetAll() {
     const db = await openDB();
-    return new Promise((resolve, reject) => {
+    return new Promise((res, rej) => {
       const tx = db.transaction(STORE, "readonly");
-      const req = tx.objectStore(STORE).getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
+      const r = tx.objectStore(STORE).getAll();
+      r.onsuccess = () => res(r.result || []);
+      r.onerror = () => rej(r.error);
     });
   }
-
   async function dbDelete(id) {
     const db = await openDB();
-    return new Promise((resolve, reject) => {
+    return new Promise((res, rej) => {
       const tx = db.transaction(STORE, "readwrite");
       tx.objectStore(STORE).delete(id);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
+      tx.oncomplete = res; tx.onerror = () => rej(tx.error);
     });
   }
 
-  // ---------------- State ----------------
-  const state = {
-    tracks: [],
-    queue: [],
-    currentIndex: -1,
-    currentTrack: null,
-    isPlaying: false,
-    repeatMode: "off", // off | all | one
+  // ── State ──────────────────────────────────────────────────
+  const S = {
+    tracks: [], queue: [], qIdx: -1,
+    current: null, playing: false,
+    repeat: "off",   // off | all | one
     shuffle: false,
-    editMode: false,
-    currentObjectURL: null,
-    paneRatios: [10, 40, 40, 10], // menu, library, playlist, settings
+    editMode: false, selected: new Set(),
+    objURL: null,
+    ratios: [20, 40, 40],  // menu, library, nowplay
+    volume: 1, fontSize: 16, theme: 100,
   };
 
-  const SUPPORTED_EXT = ["opus", "ogg", "flac", "m4a", "mp3", "wav", "aiff", "aac", "caf"];
-  const SETTINGS_KEY = "music-app-68-settings";
-  const PANE_MIN = 6;
-  const PANE_MAX = 70;
+  const SETTINGS_KEY = "68-music-app-v1";
+  const SUPPORTED = new Set(["opus","ogg","flac","m4a","mp3","wav","aiff","aac","caf"]);
+  const PANE_MIN = 8, PANE_MAX = 72;
 
-  // Grayscale-only palette: white at t=0, black at t=1. No hue anywhere.
-  const LIGHT = { bg:[250,250,250], surface:[240,240,240], surfaceRaised:[228,228,228], hairline:[210,210,210], text:[20,20,20], textDim:[100,100,100], textFaint:[150,150,150], accent:[80,80,80] };
-  const DARK  = { bg:[18,18,18], surface:[28,28,28], surfaceRaised:[38,38,38], hairline:[50,50,50], text:[240,240,240], textDim:[160,160,160], textFaint:[110,110,110], accent:[200,200,200] };
+  // Grayscale palette – no hue anywhere
+  const LIGHT = { bg:[250,250,250], sf:[238,238,238], sfr:[224,224,224], hl:[205,205,205], tx:[18,18,18], txd:[105,105,105], txf:[155,155,155], ac:[75,75,75] };
+  const DARK  = { bg:[18,18,18], sf:[28,28,28], sfr:[42,42,42], hl:[52,52,52], tx:[240,240,240], txd:[155,155,155], txf:[95,95,95], ac:[200,200,200] };
 
-  // ---------------- DOM refs ----------------
-  const $ = (id) => document.getElementById(id);
-  const audio = $("audio");
-  const libraryEl = $("library");
-  const npContent = $("np-content");
+  // ── DOM shortcuts ──────────────────────────────────────────
+  const $  = id => document.getElementById(id);
+  const au = $("audio");
+  const libEl  = $("library");
+  const npEl   = $("np-content");
   const toastEl = $("toast");
-  const fileInput = $("file-input");
-  const appEl = $("app");
+  const fileIn  = $("file-input");
+  const appEl   = $("app");
+  const menuEl  = $("menu-pane");
+  const panes   = [$("menu-pane"), $("library-pane"), $("nowplay-pane")];
 
-  const panes = [$("menu-pane"), $("library-pane"), $("playlist-pane"), $("settings-pane")];
-
-  // ---------------- Helpers ----------------
+  // ── Helpers ────────────────────────────────────────────────
   function uid() {
-    return (crypto.randomUUID ? crypto.randomUUID() : "id-" + Date.now() + "-" + Math.random().toString(16).slice(2));
+    return crypto.randomUUID ? crypto.randomUUID()
+      : "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
   }
-
-  function formatTime(sec) {
-    if (!isFinite(sec) || sec < 0) return "0:00";
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return m + ":" + String(s).padStart(2, "0");
+  function fmt(s) {
+    if (!isFinite(s) || s < 0) return "0:00";
+    return Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2,"0");
   }
-
-  function titleFromFilename(name) {
-    return name.replace(/\.[^.]+$/, "");
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c=>
+      ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
-
-  function showToast(message) {
-    toastEl.textContent = message;
-    toastEl.classList.add("visible");
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(() => toastEl.classList.remove("visible"), 3200);
+  function toast(msg) {
+    toastEl.textContent = msg; toastEl.classList.add("visible");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toastEl.classList.remove("visible"), 3000);
   }
+  function titleFrom(name) { return name.replace(/\.[^.]+$/, ""); }
 
-  function escapeHtml(str) {
-    return String(str).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-  }
-
-  // ---------------- Settings: volume / text size / appearance / pane ratios ----------------
-  function loadSettings() {
-    try {
-      const raw = localStorage.getItem(SETTINGS_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch (e) { /* fall back to defaults */ }
-    return { volume: 1, fontSize: 16, theme: 100, paneRatios: [10, 40, 40, 10] };
-  }
-
+  // ── Settings persist ───────────────────────────────────────
   function saveSettings() {
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify({
-        volume: parseFloat($("volume-slider").value),
-        fontSize: parseInt($("fontsize-slider").value, 10),
-        theme: parseInt($("theme-slider").value, 10),
-        paneRatios: state.paneRatios,
+        volume: S.volume, fontSize: S.fontSize, theme: S.theme, ratios: S.ratios
       }));
-    } catch (e) { /* not fatal */ }
+    } catch(e) {}
+  }
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      if (d.volume != null) S.volume = d.volume;
+      if (d.fontSize != null) S.fontSize = d.fontSize;
+      if (d.theme != null) S.theme = d.theme;
+      if (Array.isArray(d.ratios) && d.ratios.length === 3) S.ratios = d.ratios;
+    } catch(e) {}
   }
 
-  function lerp(a, b, t) { return Math.round(a + (b - a) * t); }
-  function lerpColor(c1, c2, t) { return `rgb(${lerp(c1[0],c2[0],t)},${lerp(c1[1],c2[1],t)},${lerp(c1[2],c2[2],t)})`; }
-
-  function applyTheme(percent) {
-    const t = percent / 100;
-    const root = document.documentElement.style;
-    root.setProperty("--bg", lerpColor(LIGHT.bg, DARK.bg, t));
-    root.setProperty("--surface", lerpColor(LIGHT.surface, DARK.surface, t));
-    root.setProperty("--surface-raised", lerpColor(LIGHT.surfaceRaised, DARK.surfaceRaised, t));
-    root.setProperty("--hairline", lerpColor(LIGHT.hairline, DARK.hairline, t));
-    root.setProperty("--text", lerpColor(LIGHT.text, DARK.text, t));
-    root.setProperty("--text-dim", lerpColor(LIGHT.textDim, DARK.textDim, t));
-    root.setProperty("--text-faint", lerpColor(LIGHT.textFaint, DARK.textFaint, t));
-    root.setProperty("--accent", lerpColor(LIGHT.accent, DARK.accent, t));
+  function lerp(a,b,t) { return Math.round(a+(b-a)*t); }
+  function lerpC(c1,c2,t) {
+    return `rgb(${lerp(c1[0],c2[0],t)},${lerp(c1[1],c2[1],t)},${lerp(c1[2],c2[2],t)})`;
   }
 
+  function applyTheme(pct) {
+    const t = pct/100;
+    const r = document.documentElement.style;
+    r.setProperty("--bg",   lerpC(LIGHT.bg, DARK.bg, t));
+    r.setProperty("--surface", lerpC(LIGHT.sf, DARK.sf, t));
+    r.setProperty("--surface-raised", lerpC(LIGHT.sfr, DARK.sfr, t));
+    r.setProperty("--hairline", lerpC(LIGHT.hl, DARK.hl, t));
+    r.setProperty("--text", lerpC(LIGHT.tx, DARK.tx, t));
+    r.setProperty("--text-dim",   lerpC(LIGHT.txd, DARK.txd, t));
+    r.setProperty("--text-faint", lerpC(LIGHT.txf, DARK.txf, t));
+    r.setProperty("--accent", lerpC(LIGHT.ac, DARK.ac, t));
+  }
   function applyFontSize(px) {
     document.documentElement.style.fontSize = px + "px";
-    const pt = (px * 0.75).toFixed(1);
-    const rem = (px / 16).toFixed(2);
-    $("fontsize-values").textContent = `${px}PX / ${pt}PT / ${rem}REM`;
   }
+  function applyVolume(v) { au.volume = v; }
 
+  function applyAllSettings() {
+    applyTheme(S.theme);
+    applyFontSize(S.fontSize);
+    applyVolume(S.volume);
+    applyPaneRatios();
+  }
   function applyPaneRatios() {
-    panes.forEach((el, i) => {
-      el.style.flexGrow = state.paneRatios[i];
+    panes.forEach((el,i) => {
+      el.style.flexGrow = S.ratios[i];
       el.style.flexShrink = 1;
       el.style.flexBasis = "0%";
     });
   }
 
-  function initSettings() {
-    const s = loadSettings();
-    $("volume-slider").value = s.volume;
-    $("fontsize-slider").value = s.fontSize;
-    $("theme-slider").value = s.theme;
-    if (Array.isArray(s.paneRatios) && s.paneRatios.length === 4) state.paneRatios = s.paneRatios;
-    audio.volume = s.volume;
-    applyFontSize(s.fontSize);
-    applyTheme(s.theme);
-    applyPaneRatios();
-  }
+  // ── Resize handles ─────────────────────────────────────────
+  function setupHandle(handleEl, ai, bi) {
+    const LP = 450;
+    let drag=false, startY=0, startR=null, timer=null;
 
-  $("volume-slider").addEventListener("input", (e) => {
-    audio.volume = parseFloat(e.target.value);
-    saveSettings();
-  });
-  $("fontsize-slider").addEventListener("input", (e) => {
-    applyFontSize(parseInt(e.target.value, 10));
-    saveSettings();
-  });
-  $("theme-slider").addEventListener("input", (e) => {
-    applyTheme(parseInt(e.target.value, 10));
-    saveSettings();
-  });
-
-  // ---------------- Resize handles (long-press, then drag up/down) ----------------
-  function setupResizeHandle(handleEl, aboveIndex, belowIndex) {
-    const LONG_PRESS_MS = 450;
-    let pressTimer = null;
-    let dragging = false;
-    let startY = 0;
-    let startRatios = null;
-
-    function endDrag() {
-      dragging = false;
-      handleEl.classList.remove("dragging");
-      saveSettings();
+    function end() {
+      drag=false; handleEl.classList.remove("dragging"); saveSettings();
     }
-
-    handleEl.addEventListener("pointerdown", (e) => {
-      clearTimeout(pressTimer);
-      pressTimer = setTimeout(() => {
-        dragging = true;
-        startY = e.clientY;
-        startRatios = state.paneRatios.slice();
+    handleEl.addEventListener("pointerdown", e => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        drag=true; startY=e.clientY; startR=S.ratios.slice();
         handleEl.classList.add("dragging");
-        try { handleEl.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
-      }, LONG_PRESS_MS);
+        try { handleEl.setPointerCapture(e.pointerId); } catch(_) {}
+      }, LP);
     });
-
-    handleEl.addEventListener("pointermove", (e) => {
-      if (!dragging) return;
-      e.preventDefault();
-      const deltaY = e.clientY - startY;
-      const totalHeight = appEl.clientHeight || 1;
-      let delta = (deltaY / totalHeight) * 100;
-
-      delta = Math.max(delta, PANE_MIN - startRatios[aboveIndex]);
-      delta = Math.min(delta, PANE_MAX - startRatios[aboveIndex]);
-      delta = Math.min(delta, startRatios[belowIndex] - PANE_MIN);
-      delta = Math.max(delta, startRatios[belowIndex] - PANE_MAX);
-
-      state.paneRatios[aboveIndex] = startRatios[aboveIndex] + delta;
-      state.paneRatios[belowIndex] = startRatios[belowIndex] - delta;
+    handleEl.addEventListener("pointermove", e => {
+      if (!drag) return; e.preventDefault();
+      let d = (e.clientY - startY) / (appEl.clientHeight||1) * 100;
+      d = Math.max(d, PANE_MIN - startR[ai]);
+      d = Math.min(d, PANE_MAX - startR[ai]);
+      d = Math.min(d, startR[bi] - PANE_MIN);
+      d = Math.max(d, startR[bi] - PANE_MAX);
+      S.ratios[ai] = startR[ai]+d; S.ratios[bi] = startR[bi]-d;
       applyPaneRatios();
     });
-
-    handleEl.addEventListener("pointerup", () => { clearTimeout(pressTimer); if (dragging) endDrag(); });
-    handleEl.addEventListener("pointercancel", () => { clearTimeout(pressTimer); if (dragging) endDrag(); });
-    handleEl.addEventListener("pointerleave", () => { if (!dragging) clearTimeout(pressTimer); });
+    handleEl.addEventListener("pointerup",     () => { clearTimeout(timer); if(drag) end(); });
+    handleEl.addEventListener("pointercancel", () => { clearTimeout(timer); if(drag) end(); });
+    handleEl.addEventListener("pointerleave",  () => { if(!drag) clearTimeout(timer); });
   }
+  setupHandle($("handle-0"), 0, 1);
+  setupHandle($("handle-1"), 1, 2);
 
-  setupResizeHandle($("handle-0"), 0, 1);
-  setupResizeHandle($("handle-1"), 1, 2);
-  setupResizeHandle($("handle-2"), 2, 3);
-
-  // ---------------- App title link menu ----------------
-  const titleMenu = $("title-menu");
-  $("app-title-btn").addEventListener("click", (e) => {
-    e.stopPropagation();
-    titleMenu.hidden = !titleMenu.hidden;
-  });
-  titleMenu.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-url]");
-    if (!btn) return;
-    window.open(btn.getAttribute("data-url"), "_blank", "noopener");
-    titleMenu.hidden = true;
-  });
-  document.addEventListener("click", (e) => {
-    if (!titleMenu.hidden && !e.target.closest(".app-title-wrap")) titleMenu.hidden = true;
-  });
-
-  // ---------------- Import ----------------
-  fileInput.addEventListener("change", async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    let imported = 0;
-    for (const file of files) {
-      const ext = (file.name.split(".").pop() || "").toLowerCase();
-      if (!SUPPORTED_EXT.includes(ext)) continue;
-      const track = {
-        id: uid(), title: titleFromFilename(file.name), duration: 0,
-        fileName: file.name, extension: ext, mimeType: file.type || "",
-        blob: file, addedAt: Date.now(), playCount: 0,
-      };
-      try { await dbPut(track); imported++; }
-      catch (err) { showToast(`Couldn't save "${file.name}"`); }
+  // ── Menu pane rendering ────────────────────────────────────
+  function renderMenu() {
+    if (S.editMode) {
+      const n = S.selected.size, total = S.tracks.length;
+      menuEl.innerHTML = `
+        <button class="btn" id="m-count">${n} / ${total} Selected</button>
+        <button class="btn"${n===0?" disabled":""} id="m-delete">Delete ${n} / ${total}</button>
+        <button class="btn" id="m-cancel">Cancel</button>`;
+    } else {
+      menuEl.innerHTML = `
+        <button class="btn wide" id="m-add">Add Track</button>
+        <button class="btn wide" id="m-settings">&#x2190; Settings &#x2192;</button>`;
     }
-    fileInput.value = "";
-    showToast(imported === 0 ? "No supported audio files found" : `${imported} track(s) added`);
-    await refreshLibrary();
-  });
-
-  $("add-btn").addEventListener("click", () => fileInput.click());
-
-  $("select-btn").addEventListener("click", () => {
-    state.editMode = !state.editMode;
-    $("select-btn").textContent = state.editMode ? "Done" : "Select Tracks";
-    $("select-btn").classList.toggle("active", state.editMode);
-    document.body.classList.toggle("edit-mode", state.editMode);
-  });
-
-  // ---------------- Library rendering ----------------
-  async function refreshLibrary() {
-    try { state.tracks = await dbGetAll(); }
-    catch (err) { showToast("Couldn't load your library"); state.tracks = []; }
-    state.tracks.sort((a, b) => a.title.localeCompare(b.title));
-    renderLibrary();
   }
 
-  function renderLibrary() {
-    const tracks = state.tracks;
+  menuEl.addEventListener("click", e => {
+    if (e.target.closest("#m-add"))      { fileIn.click(); return; }
+    if (e.target.closest("#m-settings")) { toast("Settings screen coming soon."); return; }
+    if (e.target.closest("#m-delete"))   { deleteSelected(); return; }
+    if (e.target.closest("#m-cancel"))   { cancelSelection(); return; }
+  });
 
-    if (tracks.length === 0) {
-      libraryEl.innerHTML = `
+  // ── Selection mode ─────────────────────────────────────────
+  function enterSelectionMode(id) {
+    S.editMode = true;
+    S.selected.add(id);
+    renderMenu();
+    renderLib();
+  }
+  function toggleSel(id) {
+    if (S.selected.has(id)) S.selected.delete(id);
+    else S.selected.add(id);
+    renderMenu();
+    renderLib();
+  }
+  function cancelSelection() {
+    S.editMode = false; S.selected.clear();
+    renderMenu(); renderLib();
+  }
+  async function deleteSelected() {
+    const ids = Array.from(S.selected);
+    if (!ids.length) return;
+    if (!confirm(`Delete ${ids.length} track${ids.length>1?"s":""}?`)) return;
+    for (const id of ids) {
+      await dbDelete(id);
+      if (S.current && S.current.id === id) stopPlayback();
+    }
+    S.editMode = false; S.selected.clear();
+    renderMenu();
+    await refreshLib();
+  }
+
+  // ── Import ─────────────────────────────────────────────────
+  fileIn.addEventListener("change", async e => {
+    const files = Array.from(e.target.files||[]);
+    let n = 0;
+    for (const f of files) {
+      const ext = (f.name.split(".").pop()||"").toLowerCase();
+      if (!SUPPORTED.has(ext)) continue;
+      const track = {
+        id: uid(), title: titleFrom(f.name), duration: 0,
+        fileName: f.name, extension: ext, mimeType: f.type||"",
+        blob: f, addedAt: Date.now(), playCount: 0,
+      };
+      try { await dbPut(track); n++; } catch(_) { toast(`Couldn't save "${f.name}"`); }
+    }
+    fileIn.value = "";
+    toast(n===0 ? "No supported audio files found" : `${n} track${n>1?"s":""} added`);
+    await refreshLib();
+  });
+
+  // ── Library ────────────────────────────────────────────────
+  async function refreshLib() {
+    try { S.tracks = await dbGetAll(); }
+    catch(_) { toast("Couldn't load library"); S.tracks = []; }
+    S.tracks.sort((a,b) => a.title.localeCompare(b.title));
+    renderLib();
+  }
+
+  function renderLib() {
+    if (S.tracks.length === 0) {
+      libEl.innerHTML = `
         <div class="empty-state">
           <div class="line1">Bop bop just feel the music</div>
-          <div class="line2">AAC/M4A / AIFF / FLAC / MP3 / Opus / WAV</div>
+          <div class="line2">AAC/M4A &nbsp;/&nbsp; AIFF &nbsp;/&nbsp; FLAC &nbsp;/&nbsp; MP3 &nbsp;/&nbsp; Opus &nbsp;/&nbsp; WAV</div>
         </div>`;
       return;
     }
-
-    libraryEl.innerHTML = tracks.map((t, i) => {
-      const isCurrent = state.currentTrack && state.currentTrack.id === t.id;
-      const indexLabel = isCurrent ? "&gt;&gt;" : String(i + 1).padStart(2, "0");
-      const opusPill = t.extension === "opus" ? `<span class="pill">OPUS</span>` : `<span></span>`;
+    libEl.innerHTML = S.tracks.map((t,i) => {
+      const isCur = S.current && S.current.id === t.id;
+      const isSel = S.selected.has(t.id);
+      const idx   = S.editMode
+        ? (isSel ? "[SEL]" : "[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]")
+        : (isCur ? "&gt;&gt;&gt;&gt;" : String(i+1).padStart(4,"0"));
+      const cls   = ["track-row", isCur?"current":"", isSel?"selected":""].filter(Boolean).join(" ");
+      const pill  = t.extension==="opus" ? `<span class="pill">OPUS</span>` : `<span></span>`;
       return `
-        <div class="track-row${isCurrent ? " current" : ""}" data-id="${t.id}">
-          <div class="track-index">${indexLabel}</div>
-          <div class="track-title">${escapeHtml(t.title)}</div>
-          ${opusPill}
-          <div class="track-duration">${t.duration ? formatTime(t.duration) : "--:--"}</div>
-          <button class="text-btn small track-delete" data-delete-id="${t.id}">Delete</button>
+        <div class="${cls}" data-id="${t.id}">
+          <div class="track-idx">${idx}</div>
+          <div class="track-title">${esc(t.title)}</div>
+          ${pill}
+          <div class="track-dur">${t.duration ? fmt(t.duration) : "--:--"}</div>
         </div>`;
     }).join("");
   }
 
-  libraryEl.addEventListener("click", async (e) => {
-    const deleteBtn = e.target.closest("[data-delete-id]");
-    if (deleteBtn) {
-      const id = deleteBtn.getAttribute("data-delete-id");
-      const track = state.tracks.find(t => t.id === id);
-      if (track && confirm(`Delete "${track.title}"?`)) {
-        await dbDelete(id);
-        if (state.currentTrack && state.currentTrack.id === id) stopPlayback();
-        await refreshLibrary();
-      }
-      return;
-    }
-    if (state.editMode) return;
+  // ── Library gesture: long-press to enter selection mode ────
+  const LP_MS = 450, MOVE_PX = 8;
+  let G = null;
+
+  libEl.addEventListener("pointerdown", e => {
     const row = e.target.closest(".track-row");
     if (!row) return;
-    const id = row.getAttribute("data-id");
-    const index = state.tracks.findIndex(t => t.id === id);
-    if (index >= 0) playQueueAt(state.tracks, index);
+    G = {
+      id: row.getAttribute("data-id"),
+      pid: e.pointerId,
+      x0: e.clientX, y0: e.clientY,
+      moved: false, fired: false, timer: null
+    };
+    G.timer = setTimeout(() => {
+      if (!G || G.moved) return;
+      G.fired = true;
+      if (S.editMode) toggleSel(G.id);
+      else enterSelectionMode(G.id);
+    }, LP_MS);
   });
 
-  // ---------------- Playlist / Now Playing pane rendering ----------------
-  function renderNowPlayingShell() {
-    const t = state.currentTrack;
-    if (!t) {
-      npContent.innerHTML = "";
-      return;
+  libEl.addEventListener("pointermove", e => {
+    if (!G || G.pid !== e.pointerId) return;
+    const dx = e.clientX - G.x0, dy = e.clientY - G.y0;
+    if (!G.moved && (Math.abs(dx)>MOVE_PX || Math.abs(dy)>MOVE_PX)) {
+      G.moved = true; clearTimeout(G.timer);
     }
-    npContent.innerHTML = `
-      <div class="np-meta-block">
-        <div class="np-title-row">
-          <span class="np-title" id="np-title">${escapeHtml(t.title)}</span>
-          <button class="text-btn small" id="np-edit-btn">Edit</button>
+  });
+
+  libEl.addEventListener("pointerup", e => {
+    if (!G || G.pid !== e.pointerId) { G=null; return; }
+    clearTimeout(G.timer);
+    if (!G.fired) {
+      if (S.editMode) toggleSel(G.id);
+      else {
+        const idx = S.tracks.findIndex(t => t.id === G.id);
+        if (idx >= 0) playQueueAt(S.tracks, idx);
+      }
+    }
+    G = null;
+  });
+
+  libEl.addEventListener("pointercancel", () => {
+    if (G) clearTimeout(G.timer); G = null;
+  });
+
+  // ── Now Playing rendering ──────────────────────────────────
+  function renderNP() {
+    const t = S.current;
+    if (!t) { npEl.innerHTML = ""; return; }
+
+    npEl.innerHTML = `
+      <div class="np-title-row">
+        <div class="np-title" id="np-title">${esc(t.title)}</div>
+      </div>
+
+      <div class="seek-wrap">
+        <div class="seek-track" id="seek-track">
+          <div class="seek-fill" id="seek-fill" style="width:0%"></div>
+          <div class="seek-thumb" id="seek-thumb" style="left:0%"></div>
+        </div>
+        <div class="np-times">
+          <span id="np-cur">0:00</span>
+          <span id="np-dur">0:00</span>
         </div>
       </div>
 
-      <div class="np-progress">
-        <input type="range" id="np-seek" min="0" max="1" step="0.1" value="0">
-        <div class="np-times"><span id="np-current-time">0:00</span><span id="np-duration">0:00</span></div>
-      </div>
-
       <div class="np-transport">
-        <button class="text-btn" id="np-prev">Prev</button>
-        <button class="text-btn primary" id="np-playpause">Play</button>
-        <button class="text-btn" id="np-next">Next</button>
+        <button class="btn" id="np-prev">Prev</button>
+        <button class="btn playpause" id="np-play">Play</button>
+        <button class="btn" id="np-next">Next</button>
       </div>
 
       <div class="np-modes">
-        <button class="text-btn" id="np-shuffle">Shuffle</button>
-        <button class="text-btn" id="np-repeat">Repeat Off</button>
+        <button class="btn" id="np-shuf">Shuffle</button>
+        <button class="btn" id="np-rep">Repeat Off</button>
       </div>
 
-      <div class="np-error" id="np-error"></div>
-    `;
+      <div class="np-error" id="np-err"></div>`;
 
-    $("np-playpause").addEventListener("click", togglePlayPause);
+    // seek bar interaction (pointer events on the track element)
+    const seekTrack = $("seek-track");
+    function seekByPointer(e) {
+      const r = seekTrack.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      const d = au.duration && isFinite(au.duration) ? au.duration : (S.current ? S.current.duration : 0);
+      au.currentTime = pct * d;
+      updateSeekBar(pct);
+    }
+    let seekDrag = false;
+    seekTrack.addEventListener("pointerdown", e => {
+      seekDrag = true;
+      seekTrack.setPointerCapture(e.pointerId);
+      seekByPointer(e);
+    });
+    seekTrack.addEventListener("pointermove", e => { if (seekDrag) seekByPointer(e); });
+    seekTrack.addEventListener("pointerup",   e => { if (seekDrag) { seekDrag=false; seekByPointer(e); } });
+    seekTrack.addEventListener("pointercancel", () => { seekDrag = false; });
+
     $("np-prev").addEventListener("click", prev);
+    $("np-play").addEventListener("click", togglePlay);
     $("np-next").addEventListener("click", next);
-    $("np-shuffle").addEventListener("click", () => { state.shuffle = !state.shuffle; updateAll(); });
-    $("np-repeat").addEventListener("click", () => {
-      state.repeatMode = state.repeatMode === "off" ? "all" : state.repeatMode === "all" ? "one" : "off";
+    $("np-shuf").addEventListener("click", () => { S.shuffle=!S.shuffle; updateAll(); });
+    $("np-rep").addEventListener("click", () => {
+      S.repeat = S.repeat==="off"?"all":S.repeat==="all"?"one":"off";
       updateAll();
     });
-    $("np-edit-btn").addEventListener("click", openMetadataEditor);
-
-    const seekEl = $("np-seek");
-    seekEl.addEventListener("input", () => {
-      seekDragging = true;
-      $("np-current-time").textContent = formatTime(parseFloat(seekEl.value));
-    });
-    seekEl.addEventListener("change", () => { seek(parseFloat(seekEl.value)); seekDragging = false; });
 
     updateAll();
   }
 
-  function openMetadataEditor() {
-    const t = state.currentTrack;
-    if (!t) return;
-    const titleEl = $("np-title");
-
-    const titleInput = document.createElement("input");
-    titleInput.className = "np-edit-input";
-    titleInput.value = t.title;
-    titleInput.placeholder = "Title";
-
-    titleEl.replaceWith(titleInput);
-    titleInput.focus();
-
-    async function commit() {
-      t.title = titleInput.value.trim() || t.title;
-      await dbPut(t).catch(() => {});
-      updateMediaSession(t);
-      renderNowPlayingShell();
-      renderLibrary();
-    }
-    titleInput.addEventListener("blur", commit);
-    titleInput.addEventListener("keydown", (e) => { if (e.key === "Enter") titleInput.blur(); });
+  // ── Retro seek bar update ──────────────────────────────────
+  function updateSeekBar(pct) {
+    const fill  = $("seek-fill");
+    const thumb = $("seek-thumb");
+    if (!fill || !thumb) return;
+    const p = (pct*100).toFixed(2) + "%";
+    fill.style.width = p;
+    thumb.style.left = p;
   }
 
-  // ---------------- Playback ----------------
-  function playQueueAt(tracks, index) {
-    state.queue = tracks;
-    state.currentIndex = index;
-    loadAndPlay(tracks[index]);
+  // ── Playback ───────────────────────────────────────────────
+  function playQueueAt(tracks, idx) {
+    S.queue = tracks; S.qIdx = idx;
+    loadAndPlay(tracks[idx]);
   }
 
   function loadAndPlay(track) {
-    if (state.currentObjectURL) URL.revokeObjectURL(state.currentObjectURL);
+    if (S.objURL) URL.revokeObjectURL(S.objURL);
     const url = URL.createObjectURL(track.blob);
-    state.currentObjectURL = url;
-    const isNewTrack = !state.currentTrack || state.currentTrack.id !== track.id;
-    state.currentTrack = track;
-    audio.src = url;
+    S.objURL = url;
+    const isNew = !S.current || S.current.id !== track.id;
+    S.current = track;
+    au.src = url;
+    if (isNew) renderNP();
+    else { const e=$("np-err"); if(e) e.textContent=""; }
 
-    if (isNewTrack) renderNowPlayingShell();
-    else { const errEl = $("np-error"); if (errEl) errEl.textContent = ""; }
-
-    audio.play().then(() => {
-      state.isPlaying = true;
-      track.playCount = (track.playCount || 0) + 1;
-      dbPut(track).catch(() => {});
+    au.play().then(() => {
+      S.playing = true;
+      track.playCount = (track.playCount||0)+1;
+      dbPut(track).catch(()=>{});
       updateAll();
     }).catch(err => {
-      state.isPlaying = false;
-      const errEl = $("np-error");
-      if (errEl) errEl.textContent = `Can't play this file: ${err.message || "unsupported format"}`;
+      S.playing = false;
+      const e=$("np-err");
+      if(e) e.textContent = `Can't play: ${err.message||"unsupported format"}`;
       updateAll();
     });
-
     updateMediaSession(track);
     updateAll();
   }
 
   function stopPlayback() {
-    audio.pause();
-    audio.removeAttribute("src");
-    audio.load();
-    if (state.currentObjectURL) URL.revokeObjectURL(state.currentObjectURL);
-    state.currentObjectURL = null;
-    state.currentTrack = null;
-    state.isPlaying = false;
-    state.queue = [];
-    state.currentIndex = -1;
-    renderNowPlayingShell();
-    updateAll();
+    au.pause(); au.removeAttribute("src"); au.load();
+    if (S.objURL) { URL.revokeObjectURL(S.objURL); S.objURL=null; }
+    S.current=null; S.playing=false; S.queue=[]; S.qIdx=-1;
+    renderNP(); updateAll();
   }
 
-  function togglePlayPause() {
-    if (!state.currentTrack) return;
-    if (audio.paused) audio.play().then(() => { state.isPlaying = true; updateAll(); }).catch(() => {});
-    else { audio.pause(); state.isPlaying = false; updateAll(); }
+  function togglePlay() {
+    if (!S.current) return;
+    if (au.paused) au.play().then(()=>{ S.playing=true; updateAll(); }).catch(()=>{});
+    else { au.pause(); S.playing=false; updateAll(); }
   }
 
-  function seek(time) { audio.currentTime = time; }
-
-  function advance(direction) {
-    if (state.queue.length === 0) return;
-    let idx = state.shuffle ? Math.floor(Math.random() * state.queue.length) : state.currentIndex + direction;
-    if (idx < 0) {
-      if (state.repeatMode === "all") idx = state.queue.length - 1;
-      else { audio.pause(); state.isPlaying = false; updateAll(); return; }
-    } else if (idx >= state.queue.length) {
-      if (state.repeatMode === "all") idx = 0;
-      else { audio.pause(); state.isPlaying = false; updateAll(); return; }
-    }
-    state.currentIndex = idx;
-    loadAndPlay(state.queue[idx]);
+  function advance(dir) {
+    if (!S.queue.length) return;
+    let idx = S.shuffle ? Math.floor(Math.random()*S.queue.length) : S.qIdx+dir;
+    if (idx < 0) { if(S.repeat==="all") idx=S.queue.length-1; else { au.pause();S.playing=false;updateAll();return; } }
+    else if (idx>=S.queue.length) { if(S.repeat==="all") idx=0; else { au.pause();S.playing=false;updateAll();return; } }
+    S.qIdx=idx; loadAndPlay(S.queue[idx]);
   }
-
   function next() { advance(1); }
-  function prev() { if (audio.currentTime > 3) { seek(0); return; } advance(-1); }
+  function prev() { if(au.currentTime>3){au.currentTime=0;return;} advance(-1); }
 
-  audio.addEventListener("ended", () => {
-    if (state.repeatMode === "one" && state.currentTrack) { loadAndPlay(state.currentTrack); return; }
+  au.addEventListener("ended", () => {
+    if (S.repeat==="one" && S.current) { loadAndPlay(S.current); return; }
     next();
   });
-  audio.addEventListener("timeupdate", updateProgress);
-  audio.addEventListener("durationchange", () => {
-    if (state.currentTrack && audio.duration && isFinite(audio.duration) && !state.currentTrack.duration) {
-      state.currentTrack.duration = audio.duration;
-      dbPut(state.currentTrack).catch(() => {});
-      renderLibrary();
-    }
-    updateProgress();
-  });
-  audio.addEventListener("error", () => {
-    const errEl = $("np-error");
-    if (errEl) errEl.textContent = "Can't play this file (unsupported format)";
-    state.isPlaying = false;
-    updateAll();
+
+  au.addEventListener("timeupdate", () => {
+    const dur = au.duration && isFinite(au.duration) ? au.duration : (S.current ? S.current.duration : 0);
+    const cur = au.currentTime || 0;
+    const pct = dur > 0 ? cur/dur : 0;
+    updateSeekBar(pct);
+    const ce=$("np-cur"), de=$("np-dur");
+    if(ce) ce.textContent = fmt(cur);
+    if(de) de.textContent = fmt(dur);
   });
 
-  // ---------------- MediaSession (lock screen controls) ----------------
-  function updateMediaSession(track) {
-    if (!("mediaSession" in navigator)) return;
-    navigator.mediaSession.metadata = new MediaMetadata({ title: track.title });
-    navigator.mediaSession.setActionHandler("play", () => { audio.play(); state.isPlaying = true; updateAll(); });
-    navigator.mediaSession.setActionHandler("pause", () => { audio.pause(); state.isPlaying = false; updateAll(); });
+  au.addEventListener("durationchange", () => {
+    if (S.current && au.duration && isFinite(au.duration) && !S.current.duration) {
+      S.current.duration = au.duration;
+      dbPut(S.current).catch(()=>{});
+      renderLib();
+    }
+  });
+
+  au.addEventListener("error", () => {
+    const e=$("np-err");
+    if(e) e.textContent="Can't play this file (unsupported format)";
+    S.playing=false; updateAll();
+  });
+
+  // ── MediaSession ───────────────────────────────────────────
+  function updateMediaSession(t) {
+    if (!navigator.mediaSession) return;
+    navigator.mediaSession.metadata = new MediaMetadata({ title: t.title });
+    navigator.mediaSession.setActionHandler("play",  ()=>{ au.play();S.playing=true;updateAll(); });
+    navigator.mediaSession.setActionHandler("pause", ()=>{ au.pause();S.playing=false;updateAll(); });
     navigator.mediaSession.setActionHandler("previoustrack", prev);
-    navigator.mediaSession.setActionHandler("nexttrack", next);
-    navigator.mediaSession.setActionHandler("seekto", (details) => { if (details.seekTime != null) seek(details.seekTime); });
+    navigator.mediaSession.setActionHandler("nexttrack",     next);
+    navigator.mediaSession.setActionHandler("seekto", d=>{ if(d.seekTime!=null) au.currentTime=d.seekTime; });
   }
 
-  // ---------------- UI update ----------------
-  let seekDragging = false;
-
-  function updateProgress() {
-    if (seekDragging) return;
-    const seekEl = $("np-seek");
-    if (!seekEl) return;
-    const d = audio.duration && isFinite(audio.duration) ? audio.duration : (state.currentTrack ? state.currentTrack.duration : 0);
-    seekEl.max = d || 1;
-    seekEl.value = audio.currentTime || 0;
-    $("np-current-time").textContent = formatTime(audio.currentTime || 0);
-    $("np-duration").textContent = formatTime(d || 0);
-  }
-
-  function repeatLabel() {
-    if (state.repeatMode === "one") return "Repeat One";
-    if (state.repeatMode === "all") return "Repeat All";
-    return "Repeat Off";
-  }
-
+  // ── UI sync ────────────────────────────────────────────────
   function updateAll() {
-    const playBtn = $("np-playpause");
-    if (playBtn) playBtn.textContent = state.isPlaying ? "Pause" : "Play";
-
-    const shuffleBtn = $("np-shuffle");
-    if (shuffleBtn) shuffleBtn.classList.toggle("active", state.shuffle);
-
-    const repeatBtn = $("np-repeat");
-    if (repeatBtn) {
-      repeatBtn.classList.toggle("active", state.repeatMode !== "off");
-      repeatBtn.textContent = repeatLabel();
+    const pb=$("np-play"); if(pb) pb.textContent = S.playing?"Pause":"Play";
+    const sh=$("np-shuf"); if(sh) sh.classList.toggle("active", S.shuffle);
+    const rp=$("np-rep");
+    if(rp) {
+      rp.classList.toggle("active", S.repeat!=="off");
+      rp.textContent = S.repeat==="one"?"Repeat One":S.repeat==="all"?"Repeat All":"Repeat Off";
     }
-
-    updateProgress();
-    renderLibrary();
+    renderLib();
   }
 
-  // ---------------- Init ----------------
-  initSettings();
-  renderNowPlayingShell();
-  refreshLibrary().catch(() => {
-    showToast("Couldn't open your library (Private Browsing isn't supported)");
-  });
+  // ── Init ───────────────────────────────────────────────────
+  loadSettings();
+  applyAllSettings();
+  renderMenu();
+  renderNP();
+  refreshLib().catch(() => toast("Couldn't open library (Private Browsing isn't supported)"));
 })();
 </script>
 </body>
