@@ -28,9 +28,8 @@
     background: var(--bg); color: var(--text);
     font-family: var(--mono);
     overscroll-behavior: none;
-    transition: background-color 0.25s ease, color 0.25s ease;
   }
-  body { display: flex; justify-content: center; }
+  body { display: flex; justify-content: center; overflow: hidden; }
 
   #app {
     width: 100%; max-width: 1024px; height: 100dvh;
@@ -40,18 +39,11 @@
   }
 
   /* ── Panes ── */
-  .pane {
-    min-height: 0; overflow: hidden;
-    display: flex; flex-direction: column;
-  }
+  .pane { min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
 
   #menu-pane {
-    /* flex ratio set by JS; default 20 */
     min-height: 56px;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
+    flex-direction: row; align-items: center; justify-content: center; gap: 16px;
     padding: 0 18px;
     border-bottom: 1px solid var(--hairline);
   }
@@ -61,10 +53,8 @@
 
   /* ── Resize handles ── */
   .resize-handle {
-    flex: 0 0 14px;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--bg);
-    cursor: row-resize;
+    flex: 0 0 14px; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); cursor: row-resize;
     -webkit-user-select: none; user-select: none;
     -webkit-touch-callout: none; touch-action: none;
   }
@@ -72,36 +62,35 @@
   .resize-handle.dragging { background: var(--text); }
   .resize-handle.dragging .grip { background: var(--bg); }
 
-  /* ── Win95 bevel buttons – no icons anywhere ── */
+  /* ── Bevel buttons (Win95 / terminal style, no icons) ── */
   .btn {
     appearance: none;
     background: var(--surface);
     border-style: solid; border-width: 2px;
-    border-color: rgba(255,255,255,0.50) rgba(0,0,0,0.50) rgba(0,0,0,0.50) rgba(255,255,255,0.50);
+    border-color: rgba(255,255,255,0.50) rgba(0,0,0,0.55) rgba(0,0,0,0.55) rgba(255,255,255,0.50);
     border-radius: 0;
     color: var(--text);
     font-family: var(--mono); font-weight: 700;
     font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase;
     padding: 8px 16px;
     cursor: pointer; white-space: nowrap;
+    transition: none;
   }
   .btn:active, .btn.active {
-    border-color: rgba(0,0,0,0.50) rgba(255,255,255,0.50) rgba(255,255,255,0.50) rgba(0,0,0,0.50);
+    border-color: rgba(0,0,0,0.55) rgba(255,255,255,0.50) rgba(255,255,255,0.50) rgba(0,0,0,0.55);
     background: var(--surface-raised);
   }
-  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn:disabled { opacity: 0.32; cursor: default; }
   .btn.wide { min-width: 140px; }
 
   /* ── Library ── */
-  #library { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #library { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 6px 8px 6px; }
 
-  /* each row gets bevel border */
   .track-row {
-    display: grid;
-    grid-template-columns: 44px 1fr auto auto;
+    display: grid; grid-template-columns: 48px 1fr auto auto;
     align-items: center; gap: 10px;
-    padding: 9px 14px;
-    margin: 4px 8px;
+    padding: 9px 12px;
+    margin-bottom: 4px;
     background: var(--surface);
     border-style: solid; border-width: 2px;
     border-color: rgba(255,255,255,0.40) rgba(0,0,0,0.40) rgba(0,0,0,0.40) rgba(255,255,255,0.40);
@@ -111,17 +100,15 @@
   }
   .track-row.current {
     background: var(--accent-soft);
-    border-color: rgba(255,255,255,0.25) rgba(0,0,0,0.25) rgba(0,0,0,0.25) rgba(255,255,255,0.25);
   }
   .track-row.selected {
     background: var(--surface-raised);
-    border-color: rgba(0,0,0,0.40) rgba(255,255,255,0.40) rgba(255,255,255,0.40) rgba(0,0,0,0.40);
+    border-color: rgba(0,0,0,0.50) rgba(255,255,255,0.45) rgba(255,255,255,0.45) rgba(0,0,0,0.50);
   }
 
   .track-idx {
     font-size: 0.65rem; color: var(--text-faint);
-    text-align: right; font-variant-numeric: tabular-nums;
-    letter-spacing: 0.02em;
+    text-align: right; font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
   }
   .track-row.current .track-idx { color: var(--text); font-weight: 700; }
   .track-row.selected .track-idx { color: var(--accent); font-weight: 700; }
@@ -136,58 +123,102 @@
     font-size: 0.575rem; font-weight: 700; letter-spacing: 0.04em;
     color: var(--text-dim); border: 1px solid var(--hairline); padding: 2px 5px;
   }
-  .track-dur {
-    font-size: 0.75rem; color: var(--text-dim);
-    font-variant-numeric: tabular-nums;
-  }
+  .track-dur { font-size: 0.75rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
 
-  .empty-state { padding: 10% 28px 0 28px; text-align: center; }
-  .empty-state .line1 { font-size: 1rem; font-weight: 700; margin: 0 0 10px 0; }
+  .empty-state { padding: 10% 28px 0; text-align: center; }
+  .empty-state .line1 { font-size: 1rem; font-weight: 700; margin: 0 0 10px; }
   .empty-state .line2 { font-size: 0.8rem; color: var(--text-dim); line-height: 1.8; }
 
   /* ── Now Playing ── */
   .np-title-row { text-align: center; }
-  .np-title {
-    font-size: 1.0625rem; font-weight: 700;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
+  .np-title { font-size: 1.0625rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  /* Retro seek bar — pure CSS, no images */
-  .seek-wrap { margin-top: 18px; }
+  /* Retro seek bar — pure CSS, no images, pointer-driven */
+  .seek-wrap { margin-top: 16px; }
   .seek-track {
     position: relative; width: 100%; height: 20px;
     background: var(--surface);
     border-style: solid; border-width: 2px;
-    border-color: rgba(0,0,0,0.55) rgba(255,255,255,0.35) rgba(255,255,255,0.35) rgba(0,0,0,0.55);
+    border-color: rgba(0,0,0,0.55) rgba(255,255,255,0.40) rgba(255,255,255,0.40) rgba(0,0,0,0.55);
     cursor: pointer;
   }
-  .seek-fill {
-    position: absolute; top: 0; left: 0; height: 100%;
-    background: var(--accent); opacity: 0.45;
-    pointer-events: none;
-  }
+  .seek-fill { position: absolute; top: 0; left: 0; height: 100%; background: var(--accent); opacity: 0.40; pointer-events: none; }
   .seek-thumb {
-    position: absolute; top: 50%; width: 14px; height: 20px;
+    position: absolute; top: 50%; width: 14px; height: 22px;
     background: var(--surface-raised);
     border-style: solid; border-width: 2px;
     border-color: rgba(255,255,255,0.55) rgba(0,0,0,0.55) rgba(0,0,0,0.55) rgba(255,255,255,0.55);
-    transform: translate(-50%, -50%);
-    pointer-events: none;
+    transform: translate(-50%, -50%); pointer-events: none;
   }
-  .np-times {
-    display: flex; justify-content: space-between;
-    font-size: 0.6875rem; color: var(--text-dim);
-    margin-top: 4px; letter-spacing: 0.02em;
-  }
+  .np-times { display: flex; justify-content: space-between; font-size: 0.6875rem; color: var(--text-dim); margin-top: 4px; }
 
   .np-transport { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; }
   .np-transport .btn { min-width: 72px; }
   .np-transport .btn.playpause { min-width: 90px; }
-
   .np-modes { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
   .np-modes .btn { min-width: 96px; }
-
   .np-error { margin-top: 8px; font-size: 0.75rem; text-align: center; font-weight: 700; }
+
+  /* ── Settings screen overlay ── */
+  #settings-screen {
+    position: fixed; inset: 0; z-index: 100;
+    /* Colors overridden per-element by JS (inverted theme) */
+    background: var(--bg); color: var(--text);
+    font-family: var(--mono);
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.30s cubic-bezier(0.32, 0.72, 0, 1);
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  #settings-screen.open { transform: translateX(0); }
+
+  .s-topbar {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .s-screen-title {
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .s-body { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 18px; }
+
+  .s-section { margin-bottom: 24px; }
+  .s-section-label {
+    font-size: 0.575rem; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--text-faint); margin-bottom: 10px; padding-bottom: 4px;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .s-item { margin-bottom: 18px; }
+  .s-item-label {
+    font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--text); margin-bottom: 6px;
+  }
+  .s-item-label .s-val {
+    font-weight: 400; letter-spacing: 0.02em; color: var(--text-dim);
+  }
+
+  /* Retro slider — same thumb style as seek bar */
+  .s-item input[type="range"] {
+    -webkit-appearance: none; width: 100%;
+    height: 20px; background: var(--surface);
+    border-style: solid; border-width: 2px;
+    border-color: rgba(0,0,0,0.55) rgba(255,255,255,0.40) rgba(255,255,255,0.40) rgba(0,0,0,0.55);
+    border-radius: 0; cursor: pointer;
+    outline: none;
+  }
+  .s-item input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 26px;
+    background: var(--surface-raised);
+    border-style: solid; border-width: 2px;
+    border-color: rgba(255,255,255,0.55) rgba(0,0,0,0.55) rgba(0,0,0,0.55) rgba(255,255,255,0.55);
+    border-radius: 0; cursor: pointer;
+  }
 
   /* ── Toast ── */
   #toast {
@@ -196,7 +227,7 @@
     background: var(--surface-raised); border: 1px solid var(--hairline); color: var(--text);
     font-size: 0.75rem; padding: 9px 16px; max-width: 86%; text-align: center;
     opacity: 0; pointer-events: none;
-    transition: opacity 0.25s ease, transform 0.25s ease; z-index: 50;
+    transition: opacity 0.22s ease, transform 0.22s ease; z-index: 200;
   }
   #toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -220,11 +251,41 @@
     <div id="np-content"></div>
   </section>
 
-  <input type="file" id="file-input" multiple
-    accept="audio/*,.opus,.ogg,.flac,.m4a,.mp3,.wav,.aiff,.aac">
-  <div id="toast"></div>
-  <audio id="audio" preload="metadata"></audio>
 </div>
+
+<!-- Settings screen overlay (outside #app so CSS var scope is independent) -->
+<div id="settings-screen">
+  <div class="s-topbar">
+    <button class="btn" id="s-close">Close</button>
+    <span class="s-screen-title">Settings — 68 music app</span>
+  </div>
+  <div class="s-body">
+
+    <div class="s-section">
+      <div class="s-section-label">Preferences</div>
+
+      <div class="s-item">
+        <div class="s-item-label">Volume</div>
+        <input type="range" id="s-vol" min="0" max="1" step="0.01" value="1">
+      </div>
+
+      <div class="s-item">
+        <div class="s-item-label">Text Size &nbsp;<span class="s-val" id="s-fs-val">16PX / 12.0PT / 1.00REM</span></div>
+        <input type="range" id="s-fs" min="8" max="24" step="1" value="16">
+      </div>
+
+      <div class="s-item">
+        <div class="s-item-label">Appearance &nbsp;<span class="s-val">White ← . → Black</span></div>
+        <input type="range" id="s-theme" min="0" max="100" step="1" value="100">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<input type="file" id="file-input" multiple accept="audio/*,.opus,.ogg,.flac,.m4a,.mp3,.wav,.aiff,.aac">
+<div id="toast"></div>
+<audio id="audio" preload="metadata"></audio>
 
 <script>
 (() => {
@@ -245,11 +306,11 @@
       r.onerror = () => rej(r.error);
     });
   }
-  async function dbPut(track) {
+  async function dbPut(t) {
     const db = await openDB();
     return new Promise((res, rej) => {
       const tx = db.transaction(STORE, "readwrite");
-      tx.objectStore(STORE).put(track);
+      tx.objectStore(STORE).put(t);
       tx.oncomplete = res; tx.onerror = () => rej(tx.error);
     });
   }
@@ -275,32 +336,29 @@
   const S = {
     tracks: [], queue: [], qIdx: -1,
     current: null, playing: false,
-    repeat: "off",   // off | all | one
-    shuffle: false,
+    repeat: "off", shuffle: false,
     editMode: false, selected: new Set(),
     objURL: null,
-    ratios: [20, 40, 40],  // menu, library, nowplay
+    ratios: [20, 40, 40],
     volume: 1, fontSize: 16, theme: 100,
+    settingsOpen: false,
   };
 
   const SETTINGS_KEY = "68-music-app-v1";
   const SUPPORTED = new Set(["opus","ogg","flac","m4a","mp3","wav","aiff","aac","caf"]);
   const PANE_MIN = 8, PANE_MAX = 72;
 
-  // Grayscale palette – no hue anywhere
-  const LIGHT = { bg:[250,250,250], sf:[238,238,238], sfr:[224,224,224], hl:[205,205,205], tx:[18,18,18], txd:[105,105,105], txf:[155,155,155], ac:[75,75,75] };
-  const DARK  = { bg:[18,18,18], sf:[28,28,28], sfr:[42,42,42], hl:[52,52,52], tx:[240,240,240], txd:[155,155,155], txf:[95,95,95], ac:[200,200,200] };
-
-  // ── DOM shortcuts ──────────────────────────────────────────
-  const $  = id => document.getElementById(id);
-  const au = $("audio");
+  // ── DOM ────────────────────────────────────────────────────
+  const $   = id => document.getElementById(id);
+  const au  = $("audio");
   const libEl  = $("library");
   const npEl   = $("np-content");
   const toastEl = $("toast");
   const fileIn  = $("file-input");
   const appEl   = $("app");
   const menuEl  = $("menu-pane");
-  const panes   = [$("menu-pane"), $("library-pane"), $("nowplay-pane")];
+  const settingsScreen = $("settings-screen");
+  const panes = [$("menu-pane"), $("library-pane"), $("nowplay-pane")];
 
   // ── Helpers ────────────────────────────────────────────────
   function uid() {
@@ -312,15 +370,70 @@
     return Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2,"0");
   }
   function esc(s) {
-    return String(s).replace(/[&<>"']/g, c=>
+    return String(s).replace(/[&<>"']/g, c =>
       ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
   function toast(msg) {
-    toastEl.textContent = msg; toastEl.classList.add("visible");
+    toastEl.textContent = msg;
+    toastEl.classList.add("visible");
     clearTimeout(toast._t);
     toast._t = setTimeout(() => toastEl.classList.remove("visible"), 3000);
   }
   function titleFrom(name) { return name.replace(/\.[^.]+$/, ""); }
+  function pad4(n) { return String(n).padStart(4,"0"); }
+
+  // ── Theme / contrast ───────────────────────────────────────
+  // Key fix: text color uses a binary flip at bg mid-point (≈135)
+  // so it NEVER lands in the gray-on-gray zone.
+  function lround(a, b, t) { return Math.round(a + (b - a) * Math.max(0, Math.min(1, t))); }
+
+  function computeVars(t) {
+    // t=0 → light (white),  t=1 → dark (black)
+    const bg  = lround(250, 18, t);
+    const sf  = lround(240, 28, t);
+    const sfr = lround(228, 42, t);
+    const hl  = lround(210, 52, t);
+
+    // Binary flip: bg < 135 → dark bg, use light text; bg ≥ 135 → light bg, use dark text
+    const darkBg = bg < 135;
+    const tx  = darkBg ? lround(198, 240, (t - 0.5) * 2)
+                       : lround(20,  76, t * 2);
+    const txd = darkBg ? lround(142, 165, (t - 0.5) * 2)
+                       : lround(80,  112, t * 2);
+    const txf = darkBg ? 105 : 143;
+    const ac  = darkBg ? lround(188, 210, (t - 0.5) * 2)
+                       : lround(60,  88,  t * 2);
+    const g = v => `rgb(${v},${v},${v})`;
+    return {
+      "--bg": g(bg), "--surface": g(sf), "--surface-raised": g(sfr),
+      "--hairline": g(hl), "--text": g(tx), "--text-dim": g(txd),
+      "--text-faint": g(txf), "--accent": g(ac),
+      "--accent-soft": `rgba(${ac},${ac},${ac},0.12)`,
+    };
+  }
+
+  function applyVars(el, vars) {
+    for (const [k, v] of Object.entries(vars)) el.style.setProperty(k, v);
+  }
+
+  function applyTheme(pct) {
+    S.theme = pct;
+    const t = pct / 100;
+    applyVars(document.documentElement, computeVars(t));
+    // Settings screen uses inverted t → visually opposite bg
+    applyVars(settingsScreen, computeVars(1 - t));
+  }
+
+  function applyFontSize(px) {
+    S.fontSize = px;
+    document.documentElement.style.fontSize = px + "px";
+    const pt  = (px * 0.75).toFixed(1);
+    const rem = (px / 16).toFixed(2);
+    const el = $("s-fs-val");
+    if (el) el.textContent = `${px}PX / ${pt}PT / ${rem}REM`;
+  }
+
+  function applyVolume(v) { S.volume = v; au.volume = v; }
 
   // ── Settings persist ───────────────────────────────────────
   function saveSettings() {
@@ -328,64 +441,68 @@
       localStorage.setItem(SETTINGS_KEY, JSON.stringify({
         volume: S.volume, fontSize: S.fontSize, theme: S.theme, ratios: S.ratios
       }));
-    } catch(e) {}
+    } catch(_) {}
   }
   function loadSettings() {
     try {
-      const raw = localStorage.getItem(SETTINGS_KEY);
-      if (!raw) return;
-      const d = JSON.parse(raw);
-      if (d.volume != null) S.volume = d.volume;
+      const d = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+      if (d.volume   != null) S.volume   = d.volume;
       if (d.fontSize != null) S.fontSize = d.fontSize;
-      if (d.theme != null) S.theme = d.theme;
+      if (d.theme    != null) S.theme    = d.theme;
       if (Array.isArray(d.ratios) && d.ratios.length === 3) S.ratios = d.ratios;
-    } catch(e) {}
+    } catch(_) {}
   }
 
-  function lerp(a,b,t) { return Math.round(a+(b-a)*t); }
-  function lerpC(c1,c2,t) {
-    return `rgb(${lerp(c1[0],c2[0],t)},${lerp(c1[1],c2[1],t)},${lerp(c1[2],c2[2],t)})`;
+  // Sync settings screen slider positions to current state
+  function syncSettingsSliders() {
+    const vol = $("s-vol"); if (vol) vol.value = S.volume;
+    const fs  = $("s-fs");  if (fs)  fs.value  = S.fontSize;
+    const th  = $("s-theme"); if (th) th.value = S.theme;
+    applyFontSize(S.fontSize); // refresh label
   }
 
-  function applyTheme(pct) {
-    const t = pct/100;
-    const r = document.documentElement.style;
-    r.setProperty("--bg",   lerpC(LIGHT.bg, DARK.bg, t));
-    r.setProperty("--surface", lerpC(LIGHT.sf, DARK.sf, t));
-    r.setProperty("--surface-raised", lerpC(LIGHT.sfr, DARK.sfr, t));
-    r.setProperty("--hairline", lerpC(LIGHT.hl, DARK.hl, t));
-    r.setProperty("--text", lerpC(LIGHT.tx, DARK.tx, t));
-    r.setProperty("--text-dim",   lerpC(LIGHT.txd, DARK.txd, t));
-    r.setProperty("--text-faint", lerpC(LIGHT.txf, DARK.txf, t));
-    r.setProperty("--accent", lerpC(LIGHT.ac, DARK.ac, t));
-  }
-  function applyFontSize(px) {
-    document.documentElement.style.fontSize = px + "px";
-  }
-  function applyVolume(v) { au.volume = v; }
+  // Settings sliders
+  $("s-vol").addEventListener("input", e => { applyVolume(parseFloat(e.target.value)); saveSettings(); });
+  $("s-fs").addEventListener("input", e => { applyFontSize(parseInt(e.target.value,10)); saveSettings(); });
+  $("s-theme").addEventListener("input", e => { applyTheme(parseInt(e.target.value,10)); saveSettings(); });
 
-  function applyAllSettings() {
-    applyTheme(S.theme);
-    applyFontSize(S.fontSize);
-    applyVolume(S.volume);
-    applyPaneRatios();
+  // ── Settings screen open / close ───────────────────────────
+  function openSettings() {
+    S.settingsOpen = true;
+    settingsScreen.classList.add("open");
+    syncSettingsSliders();
   }
-  function applyPaneRatios() {
-    panes.forEach((el,i) => {
-      el.style.flexGrow = S.ratios[i];
-      el.style.flexShrink = 1;
-      el.style.flexBasis = "0%";
-    });
+  function closeSettings() {
+    S.settingsOpen = false;
+    settingsScreen.classList.remove("open");
   }
 
-  // ── Resize handles ─────────────────────────────────────────
+  $("s-close").addEventListener("click", closeSettings);
+
+  // ── Global horizontal swipe → toggle settings ─────────────
+  // Uses touchstart / touchend to avoid conflicting with pointer events used elsewhere.
+  let swipeOrigin = null;
+  document.addEventListener("touchstart", e => {
+    if (e.touches.length !== 1) { swipeOrigin = null; return; }
+    swipeOrigin = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { passive: true });
+
+  document.addEventListener("touchend", e => {
+    if (!swipeOrigin) return;
+    const dx = e.changedTouches[0].clientX - swipeOrigin.x;
+    const dy = e.changedTouches[0].clientY - swipeOrigin.y;
+    swipeOrigin = null;
+    // Must be clearly horizontal (dx > 60px and 1.7× larger than vertical component)
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.7) return;
+    if (S.settingsOpen) closeSettings();
+    else openSettings();
+  }, { passive: true });
+
+  // ── Pane resize handles ────────────────────────────────────
   function setupHandle(handleEl, ai, bi) {
     const LP = 450;
     let drag=false, startY=0, startR=null, timer=null;
-
-    function end() {
-      drag=false; handleEl.classList.remove("dragging"); saveSettings();
-    }
+    function end() { drag=false; handleEl.classList.remove("dragging"); saveSettings(); }
     handleEl.addEventListener("pointerdown", e => {
       clearTimeout(timer);
       timer = setTimeout(() => {
@@ -398,8 +515,7 @@
       if (!drag) return; e.preventDefault();
       let d = (e.clientY - startY) / (appEl.clientHeight||1) * 100;
       d = Math.max(d, PANE_MIN - startR[ai]);
-      d = Math.min(d, PANE_MAX - startR[ai]);
-      d = Math.min(d, startR[bi] - PANE_MIN);
+      d = Math.min(d, PANE_MAX - startR[ai], startR[bi] - PANE_MIN);
       d = Math.max(d, startR[bi] - PANE_MAX);
       S.ratios[ai] = startR[ai]+d; S.ratios[bi] = startR[bi]-d;
       applyPaneRatios();
@@ -411,13 +527,21 @@
   setupHandle($("handle-0"), 0, 1);
   setupHandle($("handle-1"), 1, 2);
 
-  // ── Menu pane rendering ────────────────────────────────────
+  function applyPaneRatios() {
+    panes.forEach((el,i) => {
+      el.style.flexGrow = S.ratios[i];
+      el.style.flexShrink = 1;
+      el.style.flexBasis = "0%";
+    });
+  }
+
+  // ── Menu pane ──────────────────────────────────────────────
   function renderMenu() {
     if (S.editMode) {
-      const n = S.selected.size, total = S.tracks.length;
+      const n = S.selected.size, tot = S.tracks.length;
       menuEl.innerHTML = `
-        <button class="btn" id="m-count">${n} / ${total} Selected</button>
-        <button class="btn"${n===0?" disabled":""} id="m-delete">Delete ${n} / ${total}</button>
+        <button class="btn" id="m-count">${pad4(n)} / ${pad4(tot)} Selected</button>
+        <button class="btn"${n===0?" disabled":""} id="m-delete">Delete ${pad4(n)} / ${pad4(tot)}</button>
         <button class="btn" id="m-cancel">Cancel</button>`;
     } else {
       menuEl.innerHTML = `
@@ -428,23 +552,19 @@
 
   menuEl.addEventListener("click", e => {
     if (e.target.closest("#m-add"))      { fileIn.click(); return; }
-    if (e.target.closest("#m-settings")) { toast("Settings screen coming soon."); return; }
+    if (e.target.closest("#m-settings")) { openSettings(); return; }
     if (e.target.closest("#m-delete"))   { deleteSelected(); return; }
     if (e.target.closest("#m-cancel"))   { cancelSelection(); return; }
   });
 
   // ── Selection mode ─────────────────────────────────────────
   function enterSelectionMode(id) {
-    S.editMode = true;
-    S.selected.add(id);
-    renderMenu();
-    renderLib();
+    S.editMode = true; S.selected.add(id);
+    renderMenu(); renderLib();
   }
   function toggleSel(id) {
-    if (S.selected.has(id)) S.selected.delete(id);
-    else S.selected.add(id);
-    renderMenu();
-    renderLib();
+    if (S.selected.has(id)) S.selected.delete(id); else S.selected.add(id);
+    renderMenu(); renderLib();
   }
   function cancelSelection() {
     S.editMode = false; S.selected.clear();
@@ -482,16 +602,15 @@
     await refreshLib();
   });
 
-  // ── Library ────────────────────────────────────────────────
+  // ── Library render ─────────────────────────────────────────
   async function refreshLib() {
-    try { S.tracks = await dbGetAll(); }
-    catch(_) { toast("Couldn't load library"); S.tracks = []; }
+    try { S.tracks = await dbGetAll(); } catch(_) { toast("Couldn't load library"); S.tracks = []; }
     S.tracks.sort((a,b) => a.title.localeCompare(b.title));
     renderLib();
   }
 
   function renderLib() {
-    if (S.tracks.length === 0) {
+    if (!S.tracks.length) {
       libEl.innerHTML = `
         <div class="empty-state">
           <div class="line1">Bop bop just feel the music</div>
@@ -502,11 +621,11 @@
     libEl.innerHTML = S.tracks.map((t,i) => {
       const isCur = S.current && S.current.id === t.id;
       const isSel = S.selected.has(t.id);
-      const idx   = S.editMode
-        ? (isSel ? "[SEL]" : "[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]")
-        : (isCur ? "&gt;&gt;&gt;&gt;" : String(i+1).padStart(4,"0"));
-      const cls   = ["track-row", isCur?"current":"", isSel?"selected":""].filter(Boolean).join(" ");
-      const pill  = t.extension==="opus" ? `<span class="pill">OPUS</span>` : `<span></span>`;
+      let idx;
+      if (S.editMode) idx = isSel ? "&#x25BA;" : "&#x00B7;&#x00B7;&#x00B7;&#x00B7;";
+      else idx = isCur ? "&gt;&gt;&gt;&gt;" : pad4(i+1);
+      const cls = ["track-row", isCur?"current":"", isSel?"selected":""].filter(Boolean).join(" ");
+      const pill = t.extension==="opus" ? `<span class="pill">OPUS</span>` : `<span></span>`;
       return `
         <div class="${cls}" data-id="${t.id}">
           <div class="track-idx">${idx}</div>
@@ -517,37 +636,28 @@
     }).join("");
   }
 
-  // ── Library gesture: long-press to enter selection mode ────
-  const LP_MS = 450, MOVE_PX = 8;
+  // ── Library long-press gesture → selection mode ────────────
+  const LP_MS = 450, MOVE_PX = 9;
   let G = null;
 
   libEl.addEventListener("pointerdown", e => {
     const row = e.target.closest(".track-row");
     if (!row) return;
-    G = {
-      id: row.getAttribute("data-id"),
-      pid: e.pointerId,
-      x0: e.clientX, y0: e.clientY,
-      moved: false, fired: false, timer: null
-    };
+    G = { id: row.getAttribute("data-id"), pid: e.pointerId, x0:e.clientX, y0:e.clientY, moved:false, fired:false, timer:null };
     G.timer = setTimeout(() => {
       if (!G || G.moved) return;
       G.fired = true;
-      if (S.editMode) toggleSel(G.id);
-      else enterSelectionMode(G.id);
+      if (S.editMode) toggleSel(G.id); else enterSelectionMode(G.id);
     }, LP_MS);
   });
-
   libEl.addEventListener("pointermove", e => {
-    if (!G || G.pid !== e.pointerId) return;
-    const dx = e.clientX - G.x0, dy = e.clientY - G.y0;
-    if (!G.moved && (Math.abs(dx)>MOVE_PX || Math.abs(dy)>MOVE_PX)) {
+    if (!G || G.pid!==e.pointerId) return;
+    if (!G.moved && (Math.abs(e.clientX-G.x0)>MOVE_PX || Math.abs(e.clientY-G.y0)>MOVE_PX)) {
       G.moved = true; clearTimeout(G.timer);
     }
   });
-
   libEl.addEventListener("pointerup", e => {
-    if (!G || G.pid !== e.pointerId) { G=null; return; }
+    if (!G || G.pid!==e.pointerId) { G=null; return; }
     clearTimeout(G.timer);
     if (!G.fired) {
       if (S.editMode) toggleSel(G.id);
@@ -558,115 +668,84 @@
     }
     G = null;
   });
+  libEl.addEventListener("pointercancel", () => { if(G) clearTimeout(G.timer); G=null; });
 
-  libEl.addEventListener("pointercancel", () => {
-    if (G) clearTimeout(G.timer); G = null;
-  });
-
-  // ── Now Playing rendering ──────────────────────────────────
+  // ── Now Playing ────────────────────────────────────────────
   function renderNP() {
     const t = S.current;
     if (!t) { npEl.innerHTML = ""; return; }
 
     npEl.innerHTML = `
       <div class="np-title-row">
-        <div class="np-title" id="np-title">${esc(t.title)}</div>
+        <div class="np-title">${esc(t.title)}</div>
       </div>
-
       <div class="seek-wrap">
         <div class="seek-track" id="seek-track">
           <div class="seek-fill" id="seek-fill" style="width:0%"></div>
           <div class="seek-thumb" id="seek-thumb" style="left:0%"></div>
         </div>
-        <div class="np-times">
-          <span id="np-cur">0:00</span>
-          <span id="np-dur">0:00</span>
-        </div>
+        <div class="np-times"><span id="np-cur">0:00</span><span id="np-dur">0:00</span></div>
       </div>
-
       <div class="np-transport">
         <button class="btn" id="np-prev">Prev</button>
         <button class="btn playpause" id="np-play">Play</button>
         <button class="btn" id="np-next">Next</button>
       </div>
-
       <div class="np-modes">
         <button class="btn" id="np-shuf">Shuffle</button>
         <button class="btn" id="np-rep">Repeat Off</button>
       </div>
-
       <div class="np-error" id="np-err"></div>`;
 
-    // seek bar interaction (pointer events on the track element)
     const seekTrack = $("seek-track");
-    function seekByPointer(e) {
+    let seekDrag = false;
+    function seekByPtr(e) {
       const r = seekTrack.getBoundingClientRect();
       const pct = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
-      const d = au.duration && isFinite(au.duration) ? au.duration : (S.current ? S.current.duration : 0);
+      const d = (au.duration && isFinite(au.duration)) ? au.duration : (S.current?.duration || 0);
       au.currentTime = pct * d;
-      updateSeekBar(pct);
+      setSeekBar(pct);
     }
-    let seekDrag = false;
-    seekTrack.addEventListener("pointerdown", e => {
-      seekDrag = true;
-      seekTrack.setPointerCapture(e.pointerId);
-      seekByPointer(e);
-    });
-    seekTrack.addEventListener("pointermove", e => { if (seekDrag) seekByPointer(e); });
-    seekTrack.addEventListener("pointerup",   e => { if (seekDrag) { seekDrag=false; seekByPointer(e); } });
-    seekTrack.addEventListener("pointercancel", () => { seekDrag = false; });
+    seekTrack.addEventListener("pointerdown", e => { seekDrag=true; seekTrack.setPointerCapture(e.pointerId); seekByPtr(e); });
+    seekTrack.addEventListener("pointermove", e => { if(seekDrag) seekByPtr(e); });
+    seekTrack.addEventListener("pointerup",   e => { if(seekDrag){ seekDrag=false; seekByPtr(e); } });
+    seekTrack.addEventListener("pointercancel", () => { seekDrag=false; });
 
     $("np-prev").addEventListener("click", prev);
     $("np-play").addEventListener("click", togglePlay);
     $("np-next").addEventListener("click", next);
     $("np-shuf").addEventListener("click", () => { S.shuffle=!S.shuffle; updateAll(); });
     $("np-rep").addEventListener("click", () => {
-      S.repeat = S.repeat==="off"?"all":S.repeat==="all"?"one":"off";
-      updateAll();
+      S.repeat = S.repeat==="off"?"all":S.repeat==="all"?"one":"off"; updateAll();
     });
 
     updateAll();
   }
 
-  // ── Retro seek bar update ──────────────────────────────────
-  function updateSeekBar(pct) {
-    const fill  = $("seek-fill");
-    const thumb = $("seek-thumb");
-    if (!fill || !thumb) return;
-    const p = (pct*100).toFixed(2) + "%";
-    fill.style.width = p;
-    thumb.style.left = p;
+  function setSeekBar(pct) {
+    const fill=$("seek-fill"), thumb=$("seek-thumb");
+    if (!fill||!thumb) return;
+    const p = (pct*100).toFixed(2)+"%";
+    fill.style.width = p; thumb.style.left = p;
   }
 
   // ── Playback ───────────────────────────────────────────────
-  function playQueueAt(tracks, idx) {
-    S.queue = tracks; S.qIdx = idx;
-    loadAndPlay(tracks[idx]);
-  }
+  function playQueueAt(tracks, idx) { S.queue=tracks; S.qIdx=idx; loadAndPlay(tracks[idx]); }
 
   function loadAndPlay(track) {
     if (S.objURL) URL.revokeObjectURL(S.objURL);
-    const url = URL.createObjectURL(track.blob);
-    S.objURL = url;
+    S.objURL = URL.createObjectURL(track.blob);
     const isNew = !S.current || S.current.id !== track.id;
-    S.current = track;
-    au.src = url;
+    S.current = track; au.src = S.objURL;
     if (isNew) renderNP();
     else { const e=$("np-err"); if(e) e.textContent=""; }
-
     au.play().then(() => {
-      S.playing = true;
-      track.playCount = (track.playCount||0)+1;
-      dbPut(track).catch(()=>{});
-      updateAll();
+      S.playing=true; track.playCount=(track.playCount||0)+1; dbPut(track).catch(()=>{}); updateAll();
     }).catch(err => {
-      S.playing = false;
-      const e=$("np-err");
-      if(e) e.textContent = `Can't play: ${err.message||"unsupported format"}`;
-      updateAll();
+      S.playing=false; const e=$("np-err");
+      if(e) e.textContent=`Can't play: ${err.message||"unsupported format"}`; updateAll();
     });
-    updateMediaSession(track);
-    updateAll();
+    updateMediaSession(track); updateAll();
   }
 
   function stopPlayback() {
@@ -678,46 +757,35 @@
 
   function togglePlay() {
     if (!S.current) return;
-    if (au.paused) au.play().then(()=>{ S.playing=true; updateAll(); }).catch(()=>{});
+    if (au.paused) au.play().then(()=>{S.playing=true;updateAll();}).catch(()=>{});
     else { au.pause(); S.playing=false; updateAll(); }
   }
 
   function advance(dir) {
     if (!S.queue.length) return;
     let idx = S.shuffle ? Math.floor(Math.random()*S.queue.length) : S.qIdx+dir;
-    if (idx < 0) { if(S.repeat==="all") idx=S.queue.length-1; else { au.pause();S.playing=false;updateAll();return; } }
-    else if (idx>=S.queue.length) { if(S.repeat==="all") idx=0; else { au.pause();S.playing=false;updateAll();return; } }
+    if (idx<0) { if(S.repeat==="all") idx=S.queue.length-1; else{au.pause();S.playing=false;updateAll();return;} }
+    else if (idx>=S.queue.length) { if(S.repeat==="all") idx=0; else{au.pause();S.playing=false;updateAll();return;} }
     S.qIdx=idx; loadAndPlay(S.queue[idx]);
   }
   function next() { advance(1); }
   function prev() { if(au.currentTime>3){au.currentTime=0;return;} advance(-1); }
 
-  au.addEventListener("ended", () => {
-    if (S.repeat==="one" && S.current) { loadAndPlay(S.current); return; }
-    next();
-  });
-
+  au.addEventListener("ended", () => { if(S.repeat==="one"&&S.current){loadAndPlay(S.current);return;} next(); });
   au.addEventListener("timeupdate", () => {
-    const dur = au.duration && isFinite(au.duration) ? au.duration : (S.current ? S.current.duration : 0);
-    const cur = au.currentTime || 0;
-    const pct = dur > 0 ? cur/dur : 0;
-    updateSeekBar(pct);
-    const ce=$("np-cur"), de=$("np-dur");
-    if(ce) ce.textContent = fmt(cur);
-    if(de) de.textContent = fmt(dur);
+    const dur = (au.duration&&isFinite(au.duration))?au.duration:(S.current?.duration||0);
+    const cur = au.currentTime||0;
+    setSeekBar(dur>0?cur/dur:0);
+    const ce=$("np-cur"),de=$("np-dur");
+    if(ce) ce.textContent=fmt(cur); if(de) de.textContent=fmt(dur);
   });
-
   au.addEventListener("durationchange", () => {
-    if (S.current && au.duration && isFinite(au.duration) && !S.current.duration) {
-      S.current.duration = au.duration;
-      dbPut(S.current).catch(()=>{});
-      renderLib();
+    if(S.current&&au.duration&&isFinite(au.duration)&&!S.current.duration){
+      S.current.duration=au.duration; dbPut(S.current).catch(()=>{}); renderLib();
     }
   });
-
   au.addEventListener("error", () => {
-    const e=$("np-err");
-    if(e) e.textContent="Can't play this file (unsupported format)";
+    const e=$("np-err"); if(e) e.textContent="Can't play (unsupported format)";
     S.playing=false; updateAll();
   });
 
@@ -725,28 +793,31 @@
   function updateMediaSession(t) {
     if (!navigator.mediaSession) return;
     navigator.mediaSession.metadata = new MediaMetadata({ title: t.title });
-    navigator.mediaSession.setActionHandler("play",  ()=>{ au.play();S.playing=true;updateAll(); });
-    navigator.mediaSession.setActionHandler("pause", ()=>{ au.pause();S.playing=false;updateAll(); });
+    navigator.mediaSession.setActionHandler("play",  ()=>{au.play();S.playing=true;updateAll();});
+    navigator.mediaSession.setActionHandler("pause", ()=>{au.pause();S.playing=false;updateAll();});
     navigator.mediaSession.setActionHandler("previoustrack", prev);
-    navigator.mediaSession.setActionHandler("nexttrack",     next);
-    navigator.mediaSession.setActionHandler("seekto", d=>{ if(d.seekTime!=null) au.currentTime=d.seekTime; });
+    navigator.mediaSession.setActionHandler("nexttrack", next);
+    navigator.mediaSession.setActionHandler("seekto", d=>{if(d.seekTime!=null)au.currentTime=d.seekTime;});
   }
 
   // ── UI sync ────────────────────────────────────────────────
   function updateAll() {
-    const pb=$("np-play"); if(pb) pb.textContent = S.playing?"Pause":"Play";
-    const sh=$("np-shuf"); if(sh) sh.classList.toggle("active", S.shuffle);
+    const pb=$("np-play"); if(pb) pb.textContent=S.playing?"Pause":"Play";
+    const sh=$("np-shuf"); if(sh) sh.classList.toggle("active",S.shuffle);
     const rp=$("np-rep");
-    if(rp) {
-      rp.classList.toggle("active", S.repeat!=="off");
-      rp.textContent = S.repeat==="one"?"Repeat One":S.repeat==="all"?"Repeat All":"Repeat Off";
+    if(rp){
+      rp.classList.toggle("active",S.repeat!=="off");
+      rp.textContent=S.repeat==="one"?"Repeat One":S.repeat==="all"?"Repeat All":"Repeat Off";
     }
     renderLib();
   }
 
   // ── Init ───────────────────────────────────────────────────
   loadSettings();
-  applyAllSettings();
+  applyTheme(S.theme);
+  applyFontSize(S.fontSize);
+  applyVolume(S.volume);
+  applyPaneRatios();
   renderMenu();
   renderNP();
   refreshLib().catch(() => toast("Couldn't open library (Private Browsing isn't supported)"));
