@@ -43,8 +43,8 @@
 
   #menu-pane {
     min-height: 56px;
-    flex-direction: row; align-items: center; justify-content: center; gap: 16px;
-    padding: 0 18px;
+    flex-direction: row; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 0 14px;
     border-bottom: 1px solid var(--hairline);
   }
 
@@ -174,45 +174,43 @@
   }
   #settings-screen.open { transform: translateX(0); }
 
-  .s-topbar {
-    flex: 0 0 auto;
-    display: flex; align-items: center; gap: 14px;
-    padding: 10px 16px;
+  /* Settings top pane — 20%, left GitHub + centered Back */
+  .s-top {
+    flex: 20 1 0%; min-height: 56px;
+    display: flex; align-items: center;
+    padding: 0 16px; gap: 12px;
     border-bottom: 1px solid var(--hairline);
   }
-  .s-screen-title {
-    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-    color: var(--text-dim);
-  }
+  #s-close { margin: 0 auto; } /* auto left/right margins center it between GitHub btn and right edge */
 
-  .s-body { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 18px; }
-
-  .s-section { margin-bottom: 24px; }
-  .s-section-label {
-    font-size: 0.575rem; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase;
-    color: var(--text-faint); margin-bottom: 10px; padding-bottom: 4px;
+  /* Settings mid pane — 40%, scrollable sliders */
+  .s-mid {
+    flex: 40 1 0%; min-height: 60px;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
     border-bottom: 1px solid var(--hairline);
+    padding: 18px 20px;
   }
 
-  .s-item { margin-bottom: 18px; }
-  .s-item-label {
-    font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
-    color: var(--text); margin-bottom: 6px;
-  }
-  .s-item-label .s-val {
-    font-weight: 400; letter-spacing: 0.02em; color: var(--text-dim);
-  }
+  /* Settings bottom pane — 40%, intentionally empty */
+  .s-bot { flex: 40 1 0%; min-height: 60px; }
 
-  /* Retro slider — same thumb style as seek bar */
-  .s-item input[type="range"] {
-    -webkit-appearance: none; width: 100%;
+  .s-item { margin-bottom: 22px; }
+  .s-item:last-child { margin-bottom: 0; }
+  .s-label {
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text); margin-bottom: 8px;
+  }
+  .s-label .s-val { font-weight: 400; letter-spacing: 0.02em; color: var(--text-dim); }
+
+  /* Retro slider — bevel groove + square thumb */
+  .s-range {
+    -webkit-appearance: none; display: block; width: 100%;
     height: 20px; background: var(--surface);
     border-style: solid; border-width: 2px;
     border-color: rgba(0,0,0,0.55) rgba(255,255,255,0.40) rgba(255,255,255,0.40) rgba(0,0,0,0.55);
-    border-radius: 0; cursor: pointer;
-    outline: none;
+    border-radius: 0; cursor: pointer; outline: none;
   }
-  .s-item input[type="range"]::-webkit-slider-thumb {
+  .s-range::-webkit-slider-thumb {
     -webkit-appearance: none; width: 18px; height: 26px;
     background: var(--surface-raised);
     border-style: solid; border-width: 2px;
@@ -255,32 +253,29 @@
 
 <!-- Settings screen overlay (outside #app so CSS var scope is independent) -->
 <div id="settings-screen">
-  <div class="s-topbar">
-    <button class="btn" id="s-close">Close</button>
-    <span class="s-screen-title">Settings — 68 music app</span>
+
+  <div class="s-top">
+    <button class="btn" id="s-github">very berry player&#x1F353;&#x1FAD0;</button>
+    <button class="btn" id="s-close">Back</button>
   </div>
-  <div class="s-body">
 
-    <div class="s-section">
-      <div class="s-section-label">Preferences</div>
-
-      <div class="s-item">
-        <div class="s-item-label">Volume</div>
-        <input type="range" id="s-vol" min="0" max="1" step="0.01" value="1">
-      </div>
-
-      <div class="s-item">
-        <div class="s-item-label">Text Size &nbsp;<span class="s-val" id="s-fs-val">16PX / 12.0PT / 1.00REM</span></div>
-        <input type="range" id="s-fs" min="8" max="24" step="1" value="16">
-      </div>
-
-      <div class="s-item">
-        <div class="s-item-label">Appearance &nbsp;<span class="s-val">White ← . → Black</span></div>
-        <input type="range" id="s-theme" min="0" max="100" step="1" value="100">
-      </div>
+  <div class="s-mid">
+    <div class="s-item">
+      <div class="s-label">Volume</div>
+      <input class="s-range" type="range" id="s-vol" min="0" max="1" step="0.01" value="1">
     </div>
-
+    <div class="s-item">
+      <div class="s-label">Size &nbsp;<span class="s-val" id="s-fs-val">16PX / 12.0PT / 1.00REM</span></div>
+      <input class="s-range" type="range" id="s-fs" min="8" max="40" step="1" value="16">
+    </div>
+    <div class="s-item">
+      <div class="s-label">Theme</div>
+      <input class="s-range" type="range" id="s-theme" min="0" max="100" step="1" value="100">
+    </div>
   </div>
+
+  <div class="s-bot"></div>
+
 </div>
 
 <input type="file" id="file-input" multiple accept="audio/*,.opus,.ogg,.flac,.m4a,.mp3,.wav,.aiff,.aac">
@@ -477,25 +472,40 @@
     settingsScreen.classList.remove("open");
   }
 
-  $("s-close").addEventListener("click", closeSettings);
+  $("s-close").addEventListener("click",  closeSettings);
+  $("s-github").addEventListener("click", () => window.open("https://github.com/68berry/music","_blank","noopener,noreferrer"));
 
   // ── Global horizontal swipe → toggle settings ─────────────
-  // Uses touchstart / touchend to avoid conflicting with pointer events used elsewhere.
-  let swipeOrigin = null;
+  // Ignores: text selection / copy toolbar, range sliders, resize handles,
+  // vertical scroll, gestures that are too slow or too fast.
+  let SW = null;
+
   document.addEventListener("touchstart", e => {
-    if (e.touches.length !== 1) { swipeOrigin = null; return; }
-    swipeOrigin = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    if (e.touches.length !== 1)                                                { SW = null; return; }
+    if (e.target.closest('input[type="range"]'))                               { SW = null; return; }
+    if (e.target.closest(".resize-handle"))                                    { SW = null; return; }
+    if (window.getSelection && window.getSelection().toString().length > 0)    { SW = null; return; }
+    SW = { x0: e.touches[0].clientX, y0: e.touches[0].clientY, t0: Date.now(), cancelled: false };
+  }, { passive: true });
+
+  document.addEventListener("touchmove", e => {
+    if (!SW || SW.cancelled) return;
+    const dx = Math.abs(e.touches[0].clientX - SW.x0);
+    const dy = Math.abs(e.touches[0].clientY - SW.y0);
+    if (dy > 14 && dy > dx * 1.1) SW.cancelled = true; // vertical scroll → cancel
   }, { passive: true });
 
   document.addEventListener("touchend", e => {
-    if (!swipeOrigin) return;
-    const dx = e.changedTouches[0].clientX - swipeOrigin.x;
-    const dy = e.changedTouches[0].clientY - swipeOrigin.y;
-    swipeOrigin = null;
-    // Must be clearly horizontal (dx > 60px and 1.7× larger than vertical component)
-    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.7) return;
-    if (S.settingsOpen) closeSettings();
-    else openSettings();
+    if (!SW || SW.cancelled) { SW = null; return; }
+    const dx = e.changedTouches[0].clientX - SW.x0;
+    const dy = Math.abs(e.changedTouches[0].clientY - SW.y0);
+    const dt = Date.now() - SW.t0;
+    SW = null;
+    if (Math.abs(dx) < 72)       return; // too short
+    if (Math.abs(dx) < dy * 2.2) return; // not horizontal enough
+    if (dt < 60 || dt > 700)     return; // too fast (tap) or too slow (long-press/text-select)
+    if (window.getSelection && window.getSelection().toString().length > 0) return;
+    if (S.settingsOpen) closeSettings(); else openSettings();
   }, { passive: true });
 
   // ── Pane resize handles ────────────────────────────────────
@@ -545,15 +555,17 @@
         <button class="btn" id="m-cancel">Cancel</button>`;
     } else {
       menuEl.innerHTML = `
-        <button class="btn wide" id="m-add">Add Track</button>
-        <button class="btn wide" id="m-settings">&#x2190; Settings &#x2192;</button>`;
+        <button class="btn" id="m-github">very berry player&#x1F353;&#x1FAD0;</button>
+        <button class="btn" id="m-settings">Settings — Swipe to Open</button>
+        <button class="btn" id="m-add">Add Track</button>`;
     }
   }
 
   menuEl.addEventListener("click", e => {
-    if (e.target.closest("#m-add"))      { fileIn.click(); return; }
-    if (e.target.closest("#m-settings")) { openSettings(); return; }
-    if (e.target.closest("#m-delete"))   { deleteSelected(); return; }
+    if (e.target.closest("#m-github"))   { window.open("https://github.com/68berry/music","_blank","noopener,noreferrer"); return; }
+    if (e.target.closest("#m-add"))      { fileIn.click();    return; }
+    if (e.target.closest("#m-settings")) { openSettings();    return; }
+    if (e.target.closest("#m-delete"))   { deleteSelected();  return; }
     if (e.target.closest("#m-cancel"))   { cancelSelection(); return; }
   });
 
@@ -613,7 +625,6 @@
     if (!S.tracks.length) {
       libEl.innerHTML = `
         <div class="empty-state">
-          <div class="line1">Bop bop just feel the music</div>
           <div class="line2">AAC/M4A &nbsp;/&nbsp; AIFF &nbsp;/&nbsp; FLAC &nbsp;/&nbsp; MP3 &nbsp;/&nbsp; Opus &nbsp;/&nbsp; WAV</div>
         </div>`;
       return;
