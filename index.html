@@ -42,10 +42,22 @@
   .pane { min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
 
   #menu-pane {
-    min-height: 56px;
-    flex-direction: row; align-items: center; justify-content: space-between; gap: 10px;
-    padding: 0 14px;
+    min-height: 64px;
+    flex-direction: column; align-items: flex-start; justify-content: center;
+    padding: 8px 14px 10px;
     border-bottom: 1px solid var(--hairline);
+    gap: 8px;
+  }
+
+  /* very berry player title — plain text link, 16px=12pt fixed, unaffected by size slider */
+  .menu-title-link {
+    font-size: 16px;
+    text-decoration: none; color: var(--text);
+    cursor: pointer; letter-spacing: 0.02em;
+    -webkit-user-select: none; user-select: none;
+  }
+  .menu-buttons {
+    display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%;
   }
 
   #library-pane  { min-height: 60px; border-bottom: 1px solid var(--hairline); }
@@ -176,23 +188,23 @@
 
   /* Settings top pane — 20%, left GitHub + centered Back */
   .s-top {
-    flex: 20 1 0%; min-height: 56px;
-    display: flex; align-items: center;
-    padding: 0 16px; gap: 12px;
+    min-height: 64px;
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+    padding: 8px 14px 10px; gap: 8px;
     border-bottom: 1px solid var(--hairline);
   }
-  #s-close { margin: 0 auto; } /* auto left/right margins center it between GitHub btn and right edge */
+  .s-back-row { display: flex; width: 100%; justify-content: center; }
 
-  /* Settings mid pane — 40%, scrollable sliders */
+  /* Settings mid pane — scrollable sliders */
   .s-mid {
-    flex: 40 1 0%; min-height: 60px;
+    min-height: 60px;
     overflow-y: auto; -webkit-overflow-scrolling: touch;
     border-bottom: 1px solid var(--hairline);
     padding: 18px 20px;
   }
 
-  /* Settings bottom pane — 40%, intentionally empty */
-  .s-bot { flex: 40 1 0%; min-height: 60px; }
+  /* Settings bottom pane — intentionally empty */
+  .s-bot { min-height: 60px; }
 
   .s-item { margin-bottom: 22px; }
   .s-item:last-child { margin-bottom: 0; }
@@ -254,12 +266,17 @@
 <!-- Settings screen overlay (outside #app so CSS var scope is independent) -->
 <div id="settings-screen">
 
-  <div class="s-top">
-    <button class="btn" id="s-github">very berry player&#x1F353;&#x1FAD0;</button>
-    <button class="btn" id="s-close">Back</button>
+  <div class="s-top" id="s-top">
+    <a class="menu-title-link" id="s-github" href="https://github.com/68berry/music"
+       target="_blank" rel="noopener noreferrer">very berry player&#x1F353;&#x1FAD0;</a>
+    <div class="s-back-row">
+      <button class="btn" id="s-close">Swipe Back</button>
+    </div>
   </div>
 
-  <div class="s-mid">
+  <div class="resize-handle" id="s-handle-0"><div class="grip"></div></div>
+
+  <div class="s-mid" id="s-mid">
     <div class="s-item">
       <div class="s-label">Volume</div>
       <input class="s-range" type="range" id="s-vol" min="0" max="1" step="0.01" value="1">
@@ -274,7 +291,9 @@
     </div>
   </div>
 
-  <div class="s-bot"></div>
+  <div class="resize-handle" id="s-handle-1"><div class="grip"></div></div>
+
+  <div class="s-bot" id="s-bot"></div>
 
 </div>
 
@@ -434,7 +453,8 @@
   function saveSettings() {
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify({
-        volume: S.volume, fontSize: S.fontSize, theme: S.theme, ratios: S.ratios
+        volume: S.volume, fontSize: S.fontSize, theme: S.theme,
+        ratios: S.ratios, sRatios: S.sRatios,
       }));
     } catch(_) {}
   }
@@ -444,7 +464,8 @@
       if (d.volume   != null) S.volume   = d.volume;
       if (d.fontSize != null) S.fontSize = d.fontSize;
       if (d.theme    != null) S.theme    = d.theme;
-      if (Array.isArray(d.ratios) && d.ratios.length === 3) S.ratios = d.ratios;
+      if (Array.isArray(d.ratios)  && d.ratios.length  === 3) S.ratios  = d.ratios;
+      if (Array.isArray(d.sRatios) && d.sRatios.length === 3) S.sRatios = d.sRatios;
     } catch(_) {}
   }
 
@@ -465,6 +486,7 @@
   function openSettings() {
     S.settingsOpen = true;
     settingsScreen.classList.add("open");
+    applySettingsPaneRatios();
     syncSettingsSliders();
   }
   function closeSettings() {
@@ -472,8 +494,48 @@
     settingsScreen.classList.remove("open");
   }
 
-  $("s-close").addEventListener("click",  closeSettings);
-  $("s-github").addEventListener("click", () => window.open("https://github.com/68berry/music","_blank","noopener,noreferrer"));
+  $("s-close").addEventListener("click", closeSettings);
+
+  // ── Settings pane resize (independent of main pane ratios) ─
+  S.sRatios = [20, 40, 40];
+
+  function applySettingsPaneRatios() {
+    [[$("s-top"),0], [$("s-mid"),1], [$("s-bot"),2]].forEach(([el,i]) => {
+      if (!el) return;
+      el.style.flexGrow   = S.sRatios[i];
+      el.style.flexShrink = 1;
+      el.style.flexBasis  = "0%";
+    });
+  }
+
+  function setupSettingsHandle(handleEl, ai, bi) {
+    const LP = 450;
+    let drag=false, startY=0, startR=null, timer=null;
+    function end() { drag=false; handleEl.classList.remove("dragging"); saveSettings(); }
+    handleEl.addEventListener("pointerdown", e => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        drag=true; startY=e.clientY; startR=S.sRatios.slice();
+        handleEl.classList.add("dragging");
+        try { handleEl.setPointerCapture(e.pointerId); } catch(_) {}
+      }, LP);
+    });
+    handleEl.addEventListener("pointermove", e => {
+      if (!drag) return; e.preventDefault();
+      const h = settingsEl.clientHeight || appEl.clientHeight || 1;
+      let d = (e.clientY - startY) / h * 100;
+      d = Math.max(d, PANE_MIN - startR[ai]);
+      d = Math.min(d, PANE_MAX - startR[ai], startR[bi] - PANE_MIN);
+      d = Math.max(d, startR[bi] - PANE_MAX);
+      S.sRatios[ai] = startR[ai]+d; S.sRatios[bi] = startR[bi]-d;
+      applySettingsPaneRatios();
+    });
+    handleEl.addEventListener("pointerup",     () => { clearTimeout(timer); if(drag) end(); });
+    handleEl.addEventListener("pointercancel", () => { clearTimeout(timer); if(drag) end(); });
+    handleEl.addEventListener("pointerleave",  () => { if(!drag) clearTimeout(timer); });
+  }
+  setupSettingsHandle($("s-handle-0"), 0, 1);
+  setupSettingsHandle($("s-handle-1"), 1, 2);
 
   // ── Global horizontal swipe → toggle settings ─────────────
   // Ignores: text selection / copy toolbar, range sliders, resize handles,
@@ -547,22 +609,27 @@
 
   // ── Menu pane ──────────────────────────────────────────────
   function renderMenu() {
+    const title = `<a class="menu-title-link" href="https://github.com/68berry/music" target="_blank" rel="noopener noreferrer">very berry player&#x1F353;&#x1FAD0;</a>`;
     if (S.editMode) {
       const n = S.selected.size, tot = S.tracks.length;
       menuEl.innerHTML = `
-        <button class="btn" id="m-count">${pad4(n)} / ${pad4(tot)} Selected</button>
-        <button class="btn"${n===0?" disabled":""} id="m-delete">Delete ${pad4(n)} / ${pad4(tot)}</button>
-        <button class="btn" id="m-cancel">Cancel</button>`;
+        ${title}
+        <div class="menu-buttons">
+          <button class="btn" id="m-count">${pad4(n)} / ${pad4(tot)} Selected</button>
+          <button class="btn"${n===0?" disabled":""} id="m-delete">Delete ${pad4(n)} / ${pad4(tot)}</button>
+          <button class="btn" id="m-cancel">Cancel</button>
+        </div>`;
     } else {
       menuEl.innerHTML = `
-        <button class="btn" id="m-github">very berry player&#x1F353;&#x1FAD0;</button>
-        <button class="btn" id="m-settings">Settings — Swipe to Open</button>
-        <button class="btn" id="m-add">Add Track</button>`;
+        ${title}
+        <div class="menu-buttons">
+          <button class="btn" id="m-add">Add Track</button>
+          <button class="btn" id="m-settings">Settings — Swipe to Open</button>
+        </div>`;
     }
   }
 
   menuEl.addEventListener("click", e => {
-    if (e.target.closest("#m-github"))   { window.open("https://github.com/68berry/music","_blank","noopener,noreferrer"); return; }
     if (e.target.closest("#m-add"))      { fileIn.click();    return; }
     if (e.target.closest("#m-settings")) { openSettings();    return; }
     if (e.target.closest("#m-delete"))   { deleteSelected();  return; }
@@ -829,6 +896,7 @@
   applyFontSize(S.fontSize);
   applyVolume(S.volume);
   applyPaneRatios();
+  applySettingsPaneRatios();
   renderMenu();
   renderNP();
   refreshLib().catch(() => toast("Couldn't open library (Private Browsing isn't supported)"));
