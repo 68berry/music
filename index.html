@@ -270,7 +270,7 @@
     <a class="menu-title-link" id="s-github" href="https://github.com/68berry/music"
        target="_blank" rel="noopener noreferrer">very berry player&#x1F353;&#x1FAD0;</a>
     <div class="s-back-row">
-      <button class="btn" id="s-close">Swipe Back</button>
+      <button class="btn" id="s-close">&#x2190; SWIPE &#x2192; TO RETURN</button>
     </div>
   </div>
 
@@ -514,10 +514,12 @@
     function end() { drag=false; handleEl.classList.remove("dragging"); saveSettings(); }
     handleEl.addEventListener("pointerdown", e => {
       clearTimeout(timer);
+      // Capture immediately (synchronous) — async capture inside setTimeout is dropped by iOS Safari
+      try { handleEl.setPointerCapture(e.pointerId); } catch(_) {}
+      const iy = e.clientY;
       timer = setTimeout(() => {
-        drag=true; startY=e.clientY; startR=S.sRatios.slice();
+        drag=true; startY=iy; startR=S.sRatios.slice();
         handleEl.classList.add("dragging");
-        try { handleEl.setPointerCapture(e.pointerId); } catch(_) {}
       }, LP);
     });
     handleEl.addEventListener("pointermove", e => {
@@ -623,8 +625,8 @@
       menuEl.innerHTML = `
         ${title}
         <div class="menu-buttons">
-          <button class="btn" id="m-add">Add Track</button>
-          <button class="btn" id="m-settings">Settings — Swipe to Open</button>
+          <button class="btn" id="m-add">&gt;&gt; TRACK</button>
+          <button class="btn" id="m-settings">Prefs</button>
         </div>`;
     }
   }
