@@ -524,7 +524,7 @@
     });
     handleEl.addEventListener("pointermove", e => {
       if (!drag) return; e.preventDefault();
-      const h = settingsEl.clientHeight || appEl.clientHeight || 1;
+      const h = settingsScreen.clientHeight || appEl.clientHeight || 1;
       let d = (e.clientY - startY) / h * 100;
       d = Math.max(d, PANE_MIN - startR[ai]);
       d = Math.min(d, PANE_MAX - startR[ai], startR[bi] - PANE_MIN);
@@ -614,10 +614,11 @@
     const title = `<a class="menu-title-link" href="https://github.com/68berry/music" target="_blank" rel="noopener noreferrer">very berry player&#x1F353;&#x1FAD0;</a>`;
     if (S.editMode) {
       const n = S.selected.size, tot = S.tracks.length;
+      const allSel = n === tot && tot > 0;
       menuEl.innerHTML = `
         ${title}
         <div class="menu-buttons">
-          <button class="btn" id="m-count">${pad4(n)} / ${pad4(tot)} Selected</button>
+          <button class="btn${allSel ? " active" : ""}" id="m-count">${pad4(n)}</button>
           <button class="btn"${n===0?" disabled":""} id="m-delete">Delete ${pad4(n)} / ${pad4(tot)}</button>
           <button class="btn" id="m-cancel">Cancel</button>
         </div>`;
@@ -632,11 +633,21 @@
   }
 
   menuEl.addEventListener("click", e => {
+    if (e.target.closest("#m-count"))    { toggleSelectAll(); return; }
     if (e.target.closest("#m-add"))      { fileIn.click();    return; }
     if (e.target.closest("#m-settings")) { openSettings();    return; }
     if (e.target.closest("#m-delete"))   { deleteSelected();  return; }
     if (e.target.closest("#m-cancel"))   { cancelSelection(); return; }
   });
+
+  function toggleSelectAll() {
+    if (S.selected.size === S.tracks.length && S.tracks.length > 0) {
+      S.selected.clear();          // 全解除 → 0000
+    } else {
+      S.tracks.forEach(t => S.selected.add(t.id)); // 全選択
+    }
+    renderMenu(); renderLib();
+  }
 
   // ── Selection mode ─────────────────────────────────────────
   function enterSelectionMode(id) {
