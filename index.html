@@ -92,7 +92,7 @@
     border-color: rgba(0,0,0,0.55) rgba(255,255,255,0.50) rgba(255,255,255,0.50) rgba(0,0,0,0.55);
     background: var(--surface-raised);
   }
-  .btn:disabled { opacity: 0.32; cursor: default; }
+  .btn:disabled, .btn-dim { opacity: 0.32; cursor: default; }
   .btn.wide { min-width: 140px; }
 
   /* ── Library ── */
@@ -618,8 +618,8 @@
       menuEl.innerHTML = `
         ${title}
         <div class="menu-buttons">
-          <button class="btn${allSel ? " active" : ""}" id="m-count">${pad4(n)}</button>
-          <button class="btn"${n===0?" disabled":""} id="m-delete">Delete ${pad4(n)} / ${pad4(tot)}</button>
+          <button class="btn${allSel ? " active" : ""}" id="m-count">${n}</button>
+          <button class="btn${n===0?" btn-dim":""}" id="m-delete">Delete ${n} / ${tot}</button>
           <button class="btn" id="m-cancel">Cancel</button>
         </div>`;
     } else {
@@ -698,6 +698,9 @@
   async function refreshLib() {
     try { S.tracks = await dbGetAll(); } catch(_) { toast("Couldn't load library"); S.tracks = []; }
     S.tracks.sort((a,b) => a.title.localeCompare(b.title));
+    if (S.tracks.length === 0 && S.editMode) {
+      S.editMode = false; S.selected.clear(); renderMenu();
+    }
     renderLib();
   }
 
