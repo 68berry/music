@@ -49,12 +49,13 @@
     gap: 8px;
   }
 
-  /* very berry player title — plain text link, 16px=12pt fixed, unaffected by size slider */
+  /* very berry player title — plain text link, 13px=10pt fixed, unaffected by size slider */
   .menu-title-link {
-    font-size: 16px;
+    font-size: 13px;
     text-decoration: none; color: var(--text);
     cursor: pointer; letter-spacing: 0.02em;
     -webkit-user-select: none; user-select: none;
+    width: 100%; text-align: right;
   }
   .menu-buttons {
     display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%;
@@ -139,7 +140,10 @@
 
   .empty-state { padding: 10% 28px 0; text-align: center; }
   .empty-state .line1 { font-size: 1rem; font-weight: 700; margin: 0 0 10px; }
-  .empty-state .line2 { font-size: 0.8rem; color: var(--text-dim); line-height: 1.8; }
+  .empty-formats {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+    margin-top: 6px;
+  }
 
   /* ── Now Playing ── */
   .np-title-row { text-align: center; }
@@ -708,7 +712,15 @@
     if (!S.tracks.length) {
       libEl.innerHTML = `
         <div class="empty-state">
-          <div class="line2">AAC/M4A &nbsp;/&nbsp; AIFF &nbsp;/&nbsp; FLAC &nbsp;/&nbsp; MP3 &nbsp;/&nbsp; Opus &nbsp;/&nbsp; WAV</div>
+          <div class="empty-formats">
+            <span class="pill">AAC</span>
+            <span class="pill">AIFF</span>
+            <span class="pill">FLAC</span>
+            <span class="pill">M4A</span>
+            <span class="pill">MP3</span>
+            <span class="pill">OPUS</span>
+            <span class="pill">WAV</span>
+          </div>
         </div>`;
       return;
     }
