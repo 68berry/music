@@ -42,23 +42,20 @@
   .pane { min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
 
   #menu-pane {
-    min-height: 64px;
-    flex-direction: column; align-items: flex-start; justify-content: center;
-    padding: 8px 14px 10px;
-    border-bottom: 1px solid var(--hairline);
-    gap: 8px;
+    min-height: 56px;
+    flex-direction: row; align-items: center; justify-content: center; gap: 10px;
+    padding: 0 14px; border-bottom: 1px solid var(--hairline);
   }
 
-  /* very berry player title — plain text link, 13px=10pt fixed, unaffected by size slider */
+  /* very berry player — pill行内リンク */
   .menu-title-link {
-    font-size: 13px;
-    text-decoration: none; color: var(--text);
-    cursor: pointer; letter-spacing: 0.02em;
+    font-size: inherit;
+    text-decoration: none; color: var(--text-dim);
+    cursor: pointer; letter-spacing: 0.04em;
     -webkit-user-select: none; user-select: none;
-    width: 100%; text-align: right;
   }
   .menu-buttons {
-    display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%;
+    display: flex; gap: 10px; align-items: center; justify-content: center;
   }
 
   #library-pane  { min-height: 60px; border-bottom: 1px solid var(--hairline); }
@@ -271,8 +268,6 @@
 <div id="settings-screen">
 
   <div class="s-top" id="s-top">
-    <a class="menu-title-link" id="s-github" href="https://github.com/68berry/music"
-       target="_blank" rel="noopener noreferrer">very berry player&#x1F353;&#x1FAD0;</a>
     <div class="s-back-row">
       <button class="btn" id="s-close">&#x2190; SWIPE &#x2192; TO RETURN</button>
     </div>
@@ -615,12 +610,10 @@
 
   // ── Menu pane ──────────────────────────────────────────────
   function renderMenu() {
-    const title = `<a class="menu-title-link" href="https://github.com/68berry/music" target="_blank" rel="noopener noreferrer">very berry player&#x1F353;&#x1FAD0;</a>`;
     if (S.editMode) {
       const n = S.selected.size, tot = S.tracks.length;
       const allSel = n === tot && tot > 0;
       menuEl.innerHTML = `
-        ${title}
         <div class="menu-buttons">
           <button class="btn${allSel ? " active" : ""}" id="m-count">${n}</button>
           <button class="btn${n===0?" btn-dim":""}" id="m-delete">Delete ${n} / ${tot}</button>
@@ -628,7 +621,6 @@
         </div>`;
     } else {
       menuEl.innerHTML = `
-        ${title}
         <div class="menu-buttons">
           <button class="btn" id="m-add">&gt;&gt; TRACK</button>
           <button class="btn" id="m-settings">Prefs</button>
@@ -720,6 +712,10 @@
             <span class="pill">MP3</span>
             <span class="pill">OPUS</span>
             <span class="pill">WAV</span>
+          </div>
+          <div class="empty-formats" style="margin-top:10px;">
+            <a class="menu-title-link pill" id="lib-github" href="https://github.com/68berry/music"
+               target="_blank" rel="noopener noreferrer">very berry player&#x1F353;&#x1FAD0;</a>
           </div>
         </div>`;
       return;
