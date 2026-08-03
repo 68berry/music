@@ -97,7 +97,7 @@
   #library { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 6px 8px 6px; }
 
   .track-row {
-    display: grid; grid-template-columns: 48px 1fr auto auto;
+    display: grid; grid-template-columns: auto 1fr auto auto;
     align-items: center; gap: 10px;
     padding: 9px 12px;
     margin-bottom: 4px;
@@ -119,6 +119,7 @@
   .track-idx {
     font-size: 0.65rem; color: var(--text-faint);
     text-align: right; font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
+    white-space: nowrap;
   }
   .track-row.current .track-idx { color: var(--text); font-weight: 700; }
   .track-row.selected .track-idx { color: var(--accent); font-weight: 700; }
