@@ -877,7 +877,14 @@
   function next() { advance(1); }
   function prev() { if(au.currentTime>3){au.currentTime=0;return;} advance(-1); }
 
-  au.addEventListener("ended", () => { if(S.repeat==="one"&&S.current){loadAndPlay(S.current);return;} next(); });
+  au.addEventListener("ended", () => {
+    if (S.repeat==="one" && S.current) {
+      au.currentTime = 0;
+      au.play().then(()=>{ S.playing=true; updateAll(); }).catch(()=>{});
+      return;
+    }
+    next();
+  });
   au.addEventListener("timeupdate", () => {
     const dur = (au.duration&&isFinite(au.duration))?au.duration:(S.current?.duration||0);
     const cur = au.currentTime||0;
@@ -913,7 +920,7 @@
     const rp=$("np-rep");
     if(rp){
       rp.classList.toggle("active",S.repeat!=="off");
-      rp.textContent=S.repeat==="one"?"Repeat One":S.repeat==="all"?"Repeat All":"Repeat Off";
+      rp.textContent=S.repeat==="one"?"REPEAT 1":S.repeat==="all"?"Repeat All":"Repeat Off";
     }
     renderLib();
   }
