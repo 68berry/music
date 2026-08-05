@@ -43,7 +43,7 @@
 
   #menu-pane {
     min-height: 56px;
-    flex-direction: row; align-items: center; justify-content: center; gap: 10px;
+    flex-direction: row; align-items: center; justify-content: space-between; gap: 10px;
     padding: 0 14px; border-bottom: 1px solid var(--hairline);
   }
 
@@ -97,7 +97,7 @@
   #library { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 6px 8px 6px; }
 
   .track-row {
-    display: grid; grid-template-columns: auto 1fr auto auto;
+    display: grid; grid-template-columns: min-content 1fr auto auto;
     align-items: center; gap: 10px;
     padding: 9px 12px;
     margin-bottom: 4px;
@@ -611,10 +611,12 @@
 
   // ── Menu pane ──────────────────────────────────────────────
   function renderMenu() {
+    const berry = `<a class="btn" id="m-github" href="https://github.com/68berry/music" target="_blank" rel="noopener noreferrer">&#x1F353;&#x1FAD0;</a>`;
     if (S.editMode) {
       const n = S.selected.size, tot = S.tracks.length;
       const allSel = n === tot && tot > 0;
       menuEl.innerHTML = `
+        ${berry}
         <div class="menu-buttons">
           <button class="btn${allSel ? " active" : ""}" id="m-count">${n}</button>
           <button class="btn${n===0?" btn-dim":""}" id="m-delete">Delete ${n} / ${tot}</button>
@@ -622,6 +624,7 @@
         </div>`;
     } else {
       menuEl.innerHTML = `
+        ${berry}
         <div class="menu-buttons">
           <button class="btn" id="m-add">&gt;&gt; TRACK</button>
           <button class="btn" id="m-settings">Prefs</button>
@@ -715,8 +718,8 @@
             <span class="pill">WAV</span>
           </div>
           <div class="empty-formats" style="margin-top:10px;">
-            <a class="menu-title-link pill" id="lib-github" href="https://github.com/68berry/music"
-               target="_blank" rel="noopener noreferrer">very berry player&#x1F353;&#x1FAD0;</a>
+            <a class="menu-title-link pill" href="https://github.com/68berry/music"
+               target="_blank" rel="noopener noreferrer">very berry player&#x1F353;&#x1FAD0;20260805</a>
           </div>
         </div>`;
       return;
